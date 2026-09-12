@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS users (id text PRIMARY KEY, session_hash text UNIQUE NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS projects (id text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, name text NOT NULL, body jsonb NOT NULL, UNIQUE(user_id,name));
+CREATE TABLE IF NOT EXISTS sources (id text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, body jsonb NOT NULL, file_data bytea, mime text);
+CREATE INDEX IF NOT EXISTS sources_user_idx ON sources(user_id);
+CREATE TABLE IF NOT EXISTS items (id text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, source_id text NOT NULL REFERENCES sources(id) ON DELETE CASCADE, project_id text REFERENCES projects(id), body jsonb NOT NULL);
+CREATE INDEX IF NOT EXISTS items_user_idx ON items(user_id);
+CREATE TABLE IF NOT EXISTS calendar_links (id text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, item_id text UNIQUE REFERENCES items(id) ON DELETE CASCADE, body jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS activity_events (id text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, kind text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), body jsonb NOT NULL);
+CREATE TABLE IF NOT EXISTS processing_jobs (source_id text PRIMARY KEY REFERENCES sources(id) ON DELETE CASCADE, status text NOT NULL, updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS oauth_tokens (user_id text PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, encrypted text NOT NULL);
