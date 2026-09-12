@@ -17,7 +17,11 @@ const out = path.resolve('docs/screenshots');
 await mkdir(out, { recursive: true });
 const report = [];
 async function shot(name, fullPage = false) {
-  await page.waitForLoadState('networkidle');
+  await expect(page.locator('.loading-state')).toHaveCount(0);
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await Promise.all([...document.images].map((image) => image.decode().catch(() => {})));
+  });
   await page.screenshot({ path: path.join(out, name + '.png'), fullPage, animations: 'disabled' });
   console.log(name);
 }
@@ -121,7 +125,7 @@ await page.goto('http://127.0.0.1:3001/app');
 await page
   .getByLabel('Upload file')
   .setInputFiles({ name: 'unsupported.csv', mimeType: 'text/csv', buffer: Buffer.from('x,y') });
-await page.getByRole('alert').waitFor();
+await page.locator('.error-banner[role=alert]').waitFor();
 await shot('error');
 await audit('file error');
 await context.close();
