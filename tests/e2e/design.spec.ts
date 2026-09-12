@@ -63,7 +63,7 @@ test('source receipts open real image and readable PDF previews without losing p
   await page.getByLabel('Upload file').setInputFiles('demo-assets/sample-event.png');
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button', { name: 'Close dialog' }).click();
-  await page.getByRole('button', { name: 'View source for HackRice Closing Ceremony' }).click();
+  await page.getByRole('button', { name: 'View source for Design Night' }).click();
   const preview = page.getByRole('dialog').getByRole('img', { name: 'sample-event.png' });
   await expect(preview).toBeVisible();
   expect(await preview.evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(
@@ -73,13 +73,13 @@ test('source receipts open real image and readable PDF previews without losing p
   expect((await page.request.get((await original.getAttribute('href'))!)).ok()).toBe(true);
   await page.getByRole('button', { name: 'Close dialog' }).click();
   await page.getByLabel('Upload file').setInputFiles('demo-assets/sample-syllabus.pdf');
-  await expect(page.getByRole('dialog').getByText('6 dates', { exact: true })).toBeVisible();
-  const approve = await page.getByRole('button', { name: 'Add 6 to calendar' }).boundingBox();
+  await expect(page.getByRole('dialog').getByText('4 dates', { exact: true })).toBeVisible();
+  const approve = await page.getByRole('button', { name: 'Add 5 to calendar' }).boundingBox();
   expect(approve!.y + approve!.height).toBeLessThan(900);
   await page.getByRole('button', { name: 'Close dialog' }).click();
   await page.goto('/app/inbox');
   await page.getByRole('button', { name: /sample-syllabus.pdf pdf/ }).click();
-  await expect(page.locator('.pdf-text-preview')).toContainText('Assignment 1 due');
+  await expect(page.locator('.pdf-text-preview')).toContainText('Observation #2');
   await expect(page.getByRole('link', { name: 'Open original file' })).toBeVisible();
 });
 

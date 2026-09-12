@@ -1,5 +1,20 @@
-Meeting notes — September 11, 2026
-Email Maya about the meeting.
-Send the updated proposal to Alex.
-Finish client slides by September 18, 2026.
-The team prefers a short demo and a live walkthrough.
+PROJECT CHECK-IN
+September 12, 2026
+
+Attendees
+Maya, Jordan, Sam
+
+Decisions
+Keep onboarding to three screens.
+Move launch to Monday.
+
+Action Items
+Maya - send updated copy by Saturday
+Jordan - finish demo recording by Sunday
+
+Notes
+The first screen should make the purpose of the product clear without introducing every feature. A short example can establish the tone and give people a useful starting point.
+
+The group discussed how the demo moves between capture and calendar. The transition is strongest when the original source remains visible and the audience can follow where each piece of information came from.
+
+Everyone preferred a quiet visual treatment. The paper palette and restrained typography give the content room to speak. Additional decorative elements would distract from the central interaction.

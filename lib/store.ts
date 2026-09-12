@@ -1,4 +1,5 @@
 import type { DB } from './db';
+import { candidateKey } from './actionability';
 import {
   type Source,
   type Item,
@@ -69,7 +70,21 @@ export async function updateSource(db: DB, s: Source) {
 export async function commitExtraction(db: DB, source: Source, extraction: Extraction) {
   return db.transaction(async (tx) => {
     const items: Item[] = [];
+    source.metadata = extraction.metadata;
+    if (extraction.suggestedProject) {
+      const project = await projectFor(tx, source.userId, extraction.suggestedProject);
+      project.metadata = extraction.metadata;
+      project.sourceId = source.id;
+      await tx.query('UPDATE projects SET body=$1 WHERE id=$2 AND user_id=$3', [
+        JSON.stringify(project),
+        project.id,
+        source.userId,
+      ]);
+    }
+    const seen = new Set<string>();
     for (const extracted of extraction.items) {
+      if (seen.has(candidateKey(extracted))) continue;
+      seen.add(candidateKey(extracted));
       const project = extracted.project
         ? await projectFor(tx, source.userId, extracted.project)
         : undefined;

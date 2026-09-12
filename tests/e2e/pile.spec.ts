@@ -23,31 +23,33 @@ test('uploaded syllabus shows review with multiple dates and selective approval'
   await page.getByLabel('Upload file').setInputFiles('demo-assets/sample-syllabus.pdf');
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByText('6 dates', { exact: true })).toBeVisible();
-  await expect(dialog.getByText('Assignment 1 due', { exact: true })).toBeVisible();
-  await dialog.getByRole('button', { name: /Add 6 to calendar/ }).click();
+  await expect(dialog.getByText('4 dates', { exact: true })).toBeVisible();
+  await expect(dialog.getByText('Observation #2', { exact: true })).toBeVisible();
+  await dialog.getByRole('button', { name: /Add 5 to calendar/ }).click();
+  await dialog.getByRole('button', { name: /Confirm add/ }).click();
   await expect(dialog).not.toBeVisible();
   const state = await (await page.request.get('/api/state')).json();
-  expect(state.events.filter((e: { itemId?: string }) => e.itemId)).toHaveLength(6);
+  expect(state.events.filter((e: { itemId?: string }) => e.itemId)).toHaveLength(5);
 });
 test('event flyer approval creates one demo event and sync state', async ({ page }) => {
   await page.getByLabel('Upload file').setInputFiles('demo-assets/sample-event.png');
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByText('HackRice Closing Ceremony', { exact: true })).toBeVisible();
-  await expect(dialog.getByText(/RMC Grand Hall/)).toBeVisible();
+  await expect(dialog.getByText('Design Night', { exact: true })).toBeVisible();
+  await expect(dialog.getByText(/Anderson Hall/)).toBeVisible();
   await dialog.getByRole('button', { name: 'Add 1 to calendar' }).click();
+  await dialog.getByRole('button', { name: 'Confirm add 1' }).click();
   await expect(dialog).not.toBeVisible();
   await page.getByRole('link', { name: 'Calendar', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'The days ahead.' })).toBeVisible();
   const state = await (await page.request.get('/api/state')).json();
-  const item = state.items.find((i: { title: string }) => i.title === 'HackRice Closing Ceremony');
+  const item = state.items.find((i: { title: string }) => i.title === 'Design Night');
   expect(item.calendarStatus).toBe('synced');
   const res = await page.request.post('/api/calendar/' + item.id);
   expect(res.ok()).toBe(true);
   const next = await (await page.request.get('/api/state')).json();
   expect(next.events.filter((e: { itemId: string }) => e.itemId === item.id)).toHaveLength(1);
-  await page.getByLabel('Jump to date').fill('2026-09-20');
-  await expect(page.getByText('HackRice Closing Ceremony', { exact: true })).toBeVisible();
+  await page.getByLabel('Jump to date').fill('2026-09-17');
+  await expect(page.getByText('Design Night', { exact: true })).toBeVisible();
   await page.goto('/app/inbox');
   await expect(page.locator('.source-image .status')).toHaveText('Organized');
 });
@@ -56,7 +58,7 @@ test('sample voice uses transcription endpoint and the normal pipeline', async (
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('button', { name: 'Use sample transcript' }).click();
   await expect(dialog.getByLabel('Voice transcript')).toHaveValue(/email Maya/);
-  await dialog.getByRole('button', { name: 'Sort my words' }).click();
+  await dialog.getByRole('button', { name: 'Sort this' }).click();
   await expect(
     page.getByRole('dialog').getByRole('heading', { name: 'A few things found their place.' }),
   ).toBeVisible();

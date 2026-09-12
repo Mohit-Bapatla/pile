@@ -70,7 +70,7 @@ export function PileCard({
         {item.calendarStatus === 'synced' && (
           <span className="synced">
             <CheckCheck size={14} />
-            Synced
+            {item.calendarDemo ? 'Demo calendar' : 'Synced'}
           </span>
         )}
         {item.needsClarification && <span className="review-badge">Needs review</span>}

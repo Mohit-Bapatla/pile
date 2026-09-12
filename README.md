@@ -1,45 +1,16 @@
 # Pile
 
-**Dump anything in. Pile turns voice notes, files, screenshots, and messy thoughts into an organized plan.**
+**A little less on your mind.** Pile turns a messy capture into the few things you need to do, remember or attend. It is an actionable information filter, not an exhaustive extractor.
 
-A warm, quiet bulletin board for a busy mind. Built for **HackRice 16 · Work & Productivity**.
+![Pile board](docs/screenshots/board.png)
 
-![Pile’s bulletin board](docs/screenshots/board.png)
+Built for HackRice 16 with Next.js 16, React, TypeScript, PostgreSQL, ElevenLabs speech-to-text and optional Backboard memory. The warm paper board is the product; no chat dashboard or forced sponsor flows.
 
-## What Pile Does
+## Run locally
 
-Your life arrives in fragments: a voice note on a walk, a deadline in a syllabus, a screenshot of an event, a thought between meetings. Pile gives those fragments one place to land.
+Node 22+ and pnpm 11 are required.
 
-Capture something, watch it become useful tasks, events, reminders, notes, ideas, and references, then act on it. The original source stays attached. Uncertain details come back to you for a quick review. Calendar changes happen only when you approve them.
-
-## Core Features
-
-- **Natural-language capture:** split a brain dump into dated, project-associated items.
-- **Voice:** microphone recording with timer and waveform, editable transcription, and an explicit sample-transcript path without credentials.
-- **PDFs:** actual text extraction, with bulk review before adding dates to the calendar.
-- **Images:** an OpenAI-compatible vision adapter, plus a byte-verified sample-flyer fallback in demo mode.
-- **Files:** PDF, PNG, JPEG, TXT, and Markdown; drag/drop or a file picker, up to 8 MB.
-- **Board:** Today, This week, Later, and a review inbox; complete, reopen, edit, schedule, and archive items.
-- **Manual entry:** create a task or idea exactly as you want it, without an AI call.
-- **Source traceability:** original text, transcription, and uploaded files remain available; source deletion also removes its items.
-- **Calendar:** agenda/week view, explicit approvals, all-day deadlines, repeat-safe event creation, and event removal.
-- **Projects:** automatic lightweight spaces with their items and source context.
-- **Search:** source-aware keyword retrieval, with optional Backboard memory.
-- **Demo mode:** immediate entry, isolated browser workspaces, disk-backed data, seeded projects and calendar, and offline fixtures.
-
-## Why We Built It
-
-Saving information is easy. Doing the organizational work afterward is the hard part. We wanted one place where a messy thought could become something useful without opening five apps or filling out a form.
-
-Pile is a capture-and-action workspace. The interface leads with your board and what needs attention; a conversation window is not the product.
-
-## Running Locally
-
-Requires **Node.js 22 or newer** and **pnpm 11**. The validated environment used Node.js 26.0.0 and pnpm 11.19.0.
-
-```bash
-git clone https://github.com/Mohit-Bapatla/pile.git
-cd pile
+```sh
 pnpm install --frozen-lockfile
 cp .env.example .env.local
 pnpm db:migrate
@@ -47,154 +18,91 @@ pnpm db:seed
 pnpm dev
 ```
 
-Open **http://127.0.0.1:3001**. The port is deliberately 3001. Keep the hostname consistent so the browser uses the same session cookie.
+Open [Pile on localhost](http://127.0.0.1:3001/app). Keep the hostname consistent: each browser cookie identifies a private workspace. Stop the server before running CLI migrations against its embedded database.
 
-For the production build:
-
-```bash
-pnpm build
-pnpm start
-```
-
-Stop the development server before starting production on the same port. Run migrations/seeding before starting a server, not concurrently with a server using the embedded database.
-
-## Demo Mode
-
-`DEMO_MODE=true` is the default. No API keys, database service, account registration, or OAuth are required. Each new browser session receives its own seeded workspace. Reloading retains that workspace, its sources, and calendar changes.
-
-The fallback parser uses deterministic language/date rules. It is clearly identified in Settings and in source details. It is useful for live text, but does not claim the breadth of an LLM. Ambiguous phrases such as “tomorrow morning” need a precise date/time review. When a configured AI provider is unavailable, demo mode falls back to local text parsing; production mode preserves the source with an error instead.
-
-Fonts, fixtures, and application assets are bundled locally. Arbitrary screenshots need a configured vision provider; renaming a file to the sample flyer does not trigger fake extraction. A sample transcript is never presented as transcription of the user’s recording.
-
-## Demo
-
-A 90-second route through Pile:
-
-1. Open `/app`. Show the seeded Today / This week / Later board.
-2. Click **Talk it out → Use sample transcript → Sort my words**. With a configured transcription key, record your own dump instead. The sample mentions the HackRice presentation, emailing Maya, and a dentist appointment. Review the imprecise morning deadline using **Edit**.
-3. Click **Try a syllabus**, or upload `demo-assets/sample-syllabus.pdf`. The review contains **six dates**: three assignments, midterm, final, and office hours. Select which to keep; click **Add 6 to calendar** to approve all dated entries.
-4. Click **Try an event flyer**. Review “HackRice Closing Ceremony,” September 20, 2026, 3 PM America/Chicago, RMC Grand Hall. Click **Add 1 to calendar**.
-5. Open **Calendar** and use the week arrows to find the approved events. Entries explicitly identify the demo calendar.
-6. Open **Search** and ask **“What did I say about Maya?”** Open an item and expand its source.
-7. Complete a task. Use **Completed** to see it, or reopen it.
-
-Also try this live text:
-
-> Physics exam Tuesday at 2 PM and remind me to email Alex tomorrow.
-
-Use **Settings → Your demo kit** to download the three fixtures. `pnpm fixtures` regenerates them. Fixture dates are intentionally printed, fixed Fall 2026 dates; new text uses the current local date.
-
-## Screenshots
-
-Captured from the running application with Playwright: [board](docs/screenshots/board.png), [voice capture](docs/screenshots/capture.png), [mixed-source inbox](docs/screenshots/inbox.png), [calendar](docs/screenshots/calendar.png), [mobile](docs/screenshots/mobile.png), [source preview](docs/screenshots/source-image.png), and [review](docs/screenshots/review.png). Desktop QA covers 1440×900, 1512×982 and 1280×800; mobile covers 390×844.
-
-The tactile redesign uses semantic paper colors, a slim navigation rail, readable source receipts, actual image previews and extracted-text PDF sheets. Today comes first; mobile orders Today, Inbox, This week and Later after capture. The recording waveform is a status animation, not measured audio. Sorting and completion honor reduced motion.
-
-Read [the design system](docs/DESIGN.md), [the before/after audit](docs/DESIGN_AUDIT.md), and [the engineering continuation handoff](docs/RELEASE_HANDOFF.md).
-
-## Tech Stack
-
-- Next.js 16 App Router, React 19, strict TypeScript
-- CSS design tokens, locally bundled Instrument Sans Variable / Caveat, Lucide icons
-- Radix accessible dialog primitives, CSS transitions with reduced-motion support
-- Zod structured-output validation, chrono-node and date-fns-tz for dates
-- PGlite embedded PostgreSQL for local persistence; `pg` for hosted PostgreSQL
-- `pdf-parse` for PDF text, MediaRecorder for audio capture
-- Vitest, Playwright, ESLint, Prettier
-
-## Architecture
-
-```text
-text / voice / PDF / image / file
-                  ↓
-          persisted source + job
-                  ↓
-        parsing provider + validation
-                  ↓
-      linked items + inferred projects
-                  ↓
-        board + review + source history
-                  ↓
-     approved calendar actions / search
-```
-
-A source is saved before interpretation. Failed processing preserves the source and can be retried. A database claim prevents parallel requests from processing the same source twice. Items and their source status are committed in one transaction.
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the schema, provider boundaries, and operational constraints.
-
-## Integrations
-
-| Capability         | Included implementation                                                                                    | Default in this repository                                            |
-| ------------------ | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Text understanding | OpenAI-compatible Chat Completions, JSON contract, Zod validation, one retry and bounded timeouts          | Deterministic local parser                                            |
-| Vision             | OpenAI-compatible image input                                                                              | Exact sample flyer only; other images get a clear configuration error |
-| Transcription      | OpenAI-compatible audio transcription API                                                                  | Editable sample transcript or typed text                              |
-| Google Calendar    | OAuth state protection, encrypted token storage, token refresh, upcoming events, create/remove, stable IDs | Persistent demo calendar                                              |
-| Database           | Standard PostgreSQL through `pg`, or embedded PGlite with the same SQL migration                           | Disk-backed PGlite                                                    |
-| Backboard.io       | Optional persistent source-memory writes and memory-assisted search, with local retrieval fallback         | Local search                                                          |
-| Tiger Data         | Compatible PostgreSQL connection through `DATABASE_URL`                                                    | No hosted Tiger Data service connected                                |
-
-**No external provider is preconnected or bundled with credentials.** The real adapters are implemented, but their live authenticated behavior was not exercised without credentials. Tests exercise the complete local/demo system. This is a local hackathon MVP, not a deployed multi-tenant SaaS service.
-
-### Configuration
-
-Copy `.env.example` to `.env.local`. All values below are optional for demo mode.
-
-| Variable                     | Purpose / default                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------------------- |
-| `DEMO_MODE`                  | `true`; set `false` to disable demo parsing, seed and calendar fallbacks               |
-| `DATABASE_URL`               | PostgreSQL connection string; uses `pg` if supplied                                    |
-| `DATA_DIR`                   | Embedded PostgreSQL directory; default `.data/pile`                                    |
-| `OPENAI_API_KEY`             | Server-side text, image, and transcription credential                                  |
-| `OPENAI_BASE_URL`            | Default `https://api.openai.com/v1`                                                    |
-| `OPENAI_MODEL`               | Default `gpt-4.1-mini`; must support JSON output and images to use vision              |
-| `OPENAI_TRANSCRIPTION_MODEL` | Default `whisper-1`                                                                    |
-| `GOOGLE_CLIENT_ID`           | OAuth web client ID                                                                    |
-| `GOOGLE_CLIENT_SECRET`       | OAuth web client secret                                                                |
-| `GOOGLE_REDIRECT_URI`        | Exact registered callback; default example `http://127.0.0.1:3001/api/oauth/callback`  |
-| `TOKEN_ENCRYPTION_KEY`       | At least 32 random characters; protects OAuth tokens with AES-256-GCM                  |
-| `BACKBOARD_API_KEY`          | Optional Backboard credential                                                          |
-| `BACKBOARD_THREAD_ID`        | Existing dedicated personal thread; bound to the first Pile workspace that uses memory |
-| `BACKBOARD_BASE_URL`         | Default `https://app.backboard.io/api`                                                 |
-
-To configure Google Calendar, enable the Calendar API in a Google Cloud project, create an OAuth web client, register the exact redirect URI above, and add your test account if the consent screen is in testing. Set the four Google/encryption values and restart. Use **Settings → Connect**. Pile requests the `calendar.events` scope, stores encrypted server-side tokens, and never automatically creates calendar events.
-
-Use a fresh, dedicated Backboard thread for this demo. Its first Pile workspace owns that thread association; other browser sessions use local search. Backboard memory can retain older context, even after a local source is deleted. Do not reuse a thread containing another person’s information. This adapter is optional and not presented as a verified sponsor deployment.
-
-## Testing
-
-```bash
+```sh
 pnpm lint
 pnpm typecheck
 pnpm test:unit
 pnpm test:integration
 pnpm test:e2e
 pnpm build
+pnpm start
 ```
 
-Install the browser once if needed:
+Stop `pnpm dev` before `pnpm start`; both use port 3001. Playwright can start the development server itself. Install its browser with `pnpm exec playwright install chromium` when needed.
 
-```bash
-pnpm exec playwright install chromium
-```
+## What works
 
-Playwright starts or reuses the server on port 3001. Each test uses a separate browser workspace. Unit tests cover schema validation, dates/timezones, classification, board sections, project associations, confidence, source linking, and calendar IDs. Integration tests use a fresh PostgreSQL engine and run real file extraction, the source pipeline, persistence, search, deletion, and calendar approval. Browser tests exercise the primary user flows and check desktop/mobile rendering. The current suites contain **15 unit, 13 integration and 15 browser tests**. Four browser tests cover the redesign: viewport/accessibility regressions, source previews, keyboard/reduced-motion recording and sorting/failure states. Twelve additional settled dialog/state accessibility reports are saved in `docs/ACCESSIBILITY_RESULTS.json`.
+- Text, recorded voice, PDF, image and plain-text file capture, with original sources retained.
+- Conservative syllabus parsing: four important dates, one bounded class schedule, two optional schedules in the demo fixture. Instructor, website and course context belong to the project.
+- Grouped review with important items selected, optional schedules unchecked, inline editing, clear/select-all and calendar confirmation.
+- Weighted lexical search with meaningful-term matching and independent PDF/image/voice source results. No irrelevant fallback list.
+- Google OAuth, calendar selection, stable event IDs, bounded recurrence, explicit approval and conditional event updates.
+- Apple Calendar `.ics` downloads with UTF-8 folding, all-day semantics and bounded recurrence. Exports are not live sync.
+- Persisted IANA timezone preference, canonical timed instants, unchanged all-day dates.
+- Actual PDF page previews, source images, formatted notes and editable voice transcripts.
+- Today / This week / Later, project folders, completion/reopening and source provenance.
 
-`.data/`, secrets, dependencies, build output, traces, and Playwright reports are ignored. Only synthetic fixture assets and curated screenshots are committed.
+## Demo mode and truthful integration status
 
-## Known Limits
+`DEMO_MODE=true` works without credentials. Text uses local rules; the exact sample flyer is recognized by SHA-256; arbitrary image understanding requires the OpenAI-compatible vision provider. The sample transcript is explicitly a demo shortcut. Real recordings use ElevenLabs independently of OpenAI.
 
-- Demo parsing is rule-based; complex language needs a configured AI provider. General image OCR needs vision credentials. Scanned PDFs without text return a clear error.
-- Demo sessions are browser-cookie workspaces, not recoverable accounts. The default server binds to loopback; public deployment requires real authentication, quotas, and deployment-specific security controls.
-- Embedded PGlite is for a single application process with persistent disk. Use hosted PostgreSQL for multi-instance/serverless deployment; uploaded bytes are stored in the database for this MVP.
-- Processing happens in an HTTP request, with a persisted retryable job state. It is not a durable background worker.
-- Google Calendar support is one primary calendar, explicit one-way creation/removal, and fetching the next 100 upcoming events. Editing a synced item requires removing its calendar event first. No recurring events or two-way reconciliation.
-- Backboard is optional personal memory, not a full semantic index of current items; local source-aware keyword results always remain available.
+No sponsor credentials were available for this pass. Provider HTTP contracts are verified using mocks, not live accounts. Physical microphone speech was not manually verified; automated Chromium recording and injected audio cover the flow. Google events in demo mode are local demo events.
 
-## HackRice 16
+## Environment
 
-Built for the **Work & Productivity** track: less organizational labor, more room to think.
+| Variable               | Required? / purpose                                                                                                     |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `DEMO_MODE`            | Optional; defaults to true. False requires a text/vision provider for automatic parsing and Google for calendar writes. |
+| `DATA_DIR`             | Optional; embedded PGlite directory, default `.data/pile`.                                                              |
+| `TIGER_DATABASE_URL`   | Optional; Tiger Data PostgreSQL connection. Takes precedence over `DATABASE_URL`.                                       |
+| `DATABASE_URL`         | Optional; any standard PostgreSQL connection. Otherwise PGlite persists locally.                                        |
+| `OPENAI_API_KEY`       | Optional; real text and image understanding.                                                                            |
+| `OPENAI_BASE_URL`      | Optional; OpenAI-compatible base URL, default `https://api.openai.com/v1`.                                              |
+| `OPENAI_MODEL`         | Optional; defaults to `gpt-4.1-mini`.                                                                                   |
+| `ELEVENLABS_API_KEY`   | Required only for real audio transcription. Server-only.                                                                |
+| `ELEVENLABS_STT_MODEL` | Optional; defaults to `scribe_v2`.                                                                                      |
+| `GOOGLE_CLIENT_ID`     | Required for Google OAuth.                                                                                              |
+| `GOOGLE_CLIENT_SECRET` | Required for Google OAuth.                                                                                              |
+| `GOOGLE_REDIRECT_URI`  | Required for Google OAuth; local value `http://127.0.0.1:3001/api/oauth/callback`.                                      |
+| `TOKEN_ENCRYPTION_KEY` | Required for Google; at least 32 characters, used for AES-GCM token encryption.                                         |
+| `BACKBOARD_API_KEY`    | Optional; explicit private assistant memory and semantic retrieval.                                                     |
+| `BACKBOARD_BASE_URL`   | Optional; defaults to `https://app.backboard.io/api`.                                                                   |
 
-## Team
+Old `BACKBOARD_THREAD_ID` is no longer used. Each workspace receives a separate assistant because Backboard memory spans threads. The retained legacy OpenAI transcription adapter is not used by the application; its optional `OPENAI_TRANSCRIPTION_MODEL` defaults to `whisper-1`.
 
-Add your team’s names, roles, and links here.
+For Google, enable Calendar API, register the OAuth web client and exact redirect URI, add a test account if consent is in testing, then use Settings → Connect. Scopes are `calendar.events` and `calendar.calendarlist.readonly`. Reconnect existing authorizations to grant calendar-list access. Disconnect removes the local tokens; existing external events remain.
+
+## Architecture
+
+`app/api/[...path]/route.ts` is the authenticated API boundary. Opaque cookie sessions isolate browser workspaces. `lib/pipeline.ts` claims a persisted processing job; text/vision/PDF parsing is validated and filtered before `lib/store.ts` commits sources, projects and items. The schema allows an empty result: saving a document does not require creating a card.
+
+`lib/actionability.ts` applies importance tiers and deduplication. `lib/syllabus.ts` handles explicit course schedules and metadata. `lib/search.ts` separates item evidence from full-source search. `lib/memory.ts` writes high-value items with ownership metadata to Backboard and merges relevant owned IDs into local results. Corrections update memory records; deletion removes indexed memories before local records.
+
+`lib/calendar.ts` owns Google and demo event adapters. `lib/ics.ts` generates Apple-compatible exports. `lib/recurrence.ts` renders bounded occurrences across DST without expanding persisted schedules. User timezone/calendar preferences live in `user_preferences`.
+
+PGlite and hosted PostgreSQL implement the same DB interface. Repeatable migrations add preferences, private memory assistant mappings, memory IDs, and unique source fingerprints. No vector extension is required.
+
+## Current demo kit
+
+- **Syllabus:** three-page fictional UGS 303 Fall 2026 course. Four assessment dates, Tuesday/Thursday class, optional office hours and tutoring. Lots of course prose stays as context. A repeated assessment date deduplicates.
+- **Meeting notes:** original editorial notes with Maya and Jordan's two actions plus a Monday launch. Attendees and ordinary discussion are not cards.
+- **Flyer:** restrained Design Night poster, September 17, 2026 at 7 PM, Rice Architecture / Anderson Hall. End time is not invented in extraction; a one-hour calendar default applies when exporting an event without an explicit end.
+
+Regenerate with `pnpm fixtures`. Capture current screens with `pnpm screenshots` against the running app.
+
+## 90-second demo
+
+1. Show the quiet Today board.
+2. Paste “Email Maya about internships tomorrow; Chemistry homework due September 20, 2026.” Sort it.
+3. Upload the syllabus. Show four dates, one schedule, optional office hours and source details. No professor or Overview cards.
+4. Download the selected Apple calendar file, or confirm adding five events to the clearly labeled demo calendar.
+5. Open the actual PDF preview, then search “Maya,” “chemistry deadlines,” and nonsense to prove filtering.
+6. Show the voice transcript shortcut, explicitly calling it a sample. Use real microphone capture only after configuring and live-verifying ElevenLabs.
+
+## Handoff and verification
+
+Read [root causes and policy](docs/FIX_PASS.md), [current functional handoff](docs/FUNCTIONAL_HANDOFF.md), [design tokens and principles](docs/DESIGN.md), and [accessibility results](docs/ACCESSIBILITY_RESULTS.json). Older design-pass release documents are historical.
+
+The local demo is not a multi-device account product. Browser-cookie sessions, no background external calendar reconciliation, limited deterministic document layouts, no scanned-PDF OCR, and no retained audio playback are intentional current limits. See the handoff for exact tests and provider verification boundaries.

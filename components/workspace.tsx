@@ -2,6 +2,11 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from 'react';
 import Link from 'next/link';
 import { PileCard } from './pile-card';
+import { CalendarSettings, downloadCalendar } from './calendar-settings';
+import type { Preferences } from '@/lib/preferences';
+import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { calendarOccurrences, nextMeeting } from '@/lib/recurrence';
+import { matchingExcerpt, searchTokens } from '@/lib/search';
 import { SourceCard, SourcePreview } from './source-card';
 import { useRouter } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -57,6 +62,9 @@ type Config = {
   googleConfigured: boolean;
   calendar: string;
   googleConnected: boolean;
+  elevenlabs: string;
+  backboard: string;
+  persistence: string;
 };
 type Snapshot = {
   items: Item[];
@@ -64,6 +72,7 @@ type Snapshot = {
   projects: Project[];
   events: CalendarEvent[];
   config: Config;
+  preferences: Preferences;
 };
 const icons: Record<string, LucideIcon> = {
   task: Check,
@@ -79,8 +88,6 @@ const icons: Record<string, LucideIcon> = {
   image: Paperclip,
   file: FileText,
 };
-// OAuth starts with a full-page navigation so the provider redirect can leave the app.
-const googleConnectPath = '/api/oauth/connect';
 const nav = [
   ['Board', '/app', LayoutDashboard],
   ['Inbox', '/app/inbox', Inbox],
@@ -183,7 +190,7 @@ export default function Workspace({ view }: { view: string[] }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Item[]>([]);
   const [searching, setSearching] = useState(false);
-  const [answer, setAnswer] = useState('');
+  const [sourceResults, setSourceResults] = useState<Source[]>([]);
   const [showDone, setShowDone] = useState(false);
   const [menu, setMenu] = useState(false);
   const [drag, setDrag] = useState(false);
@@ -200,10 +207,16 @@ export default function Workspace({ view }: { view: string[] }) {
   );
   const fileInput = useRef<HTMLInputElement>(null);
   const captureInput = useRef<HTMLTextAreaElement>(null);
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezone = data?.preferences?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   const today = localDate(new Date(), timezone);
   const refresh = useCallback(async () => {
     const next = await api<Snapshot>('state');
+    if (!next.preferences?.timezone) {
+      next.preferences = await api<Preferences>('preferences', 'PATCH', {
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timezoneDetected: true,
+      });
+    }
     setData(next);
     return next;
   }, []);
@@ -227,7 +240,7 @@ export default function Workspace({ view }: { view: string[] }) {
         const found = await r.json();
         if (!r.ok) throw new Error(found.error);
         setResults(found.items);
-        setAnswer(found.answer || '');
+        setSourceResults(found.sources || []);
         setSearching(false);
       } catch (e) {
         if (!controller.signal.aborted) {
@@ -268,7 +281,11 @@ export default function Workspace({ view }: { view: string[] }) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
     }
   }
-  async function capture(content: string | File, type: 'text' | 'voice' = 'text') {
+  async function capture(
+    content: string | File,
+    type: 'text' | 'voice' = 'text',
+    durationSeconds?: number,
+  ) {
     if (busy) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const landing = new Promise((resolve) => setTimeout(resolve, reduced ? 0 : 800));
@@ -284,12 +301,21 @@ export default function Workspace({ view }: { view: string[] }) {
         form.set('timezone', timezone);
         body = form;
       } else {
-        body = { text: content, type, timezone };
+        body = { text: content, type, timezone, durationSeconds };
       }
       const source = await api<Source>('capture', 'POST', body);
       setText('');
       await refresh();
-      const result = await api<{ items: Item[] }>('process/' + source.id, 'POST');
+      if (source.duplicateOf) {
+        setSorting(undefined);
+        setReview(source.id);
+        setToast('Already in your pile. Opened the original import.');
+        return;
+      }
+      const result = await api<{ items: Item[]; memoryWarning?: string }>(
+        'process/' + source.id,
+        'POST',
+      );
       await landing;
       setArriving(result.items.map((i) => i.id));
       setSorting({
@@ -305,7 +331,12 @@ export default function Workspace({ view }: { view: string[] }) {
         },
         reduced ? 0 : 1400,
       );
-      setToast(`${result.items.length} things, a little more organized.`);
+      setToast(
+        result.memoryWarning ||
+          (result.items.length
+            ? `${result.items.length} useful items, a little more organized.`
+            : 'Original saved. No new actions to manage.'),
+      );
       if (
         source.type === 'pdf' ||
         source.type === 'image' ||
@@ -327,13 +358,20 @@ export default function Workspace({ view }: { view: string[] }) {
     ) || [];
   const needsAttention = active.filter(
     (i) =>
-      i.needsClarification ||
-      i.status === 'inbox' ||
-      ['suggested', 'failed'].includes(i.calendarStatus),
+      i.tier !== 'optional' &&
+      (i.needsClarification ||
+        i.status === 'inbox' ||
+        ['suggested', 'failed'].includes(i.calendarStatus)),
   );
   const inbox = active.filter((i) => section(i, today, timezone) === 'Inbox');
-  const events = Array.from(
-    new Map([...(data?.events || []), ...remoteEvents].map((e) => [e.id, e])).values(),
+  const weekStart = new Date(Date.parse(today) + calendarOffset * 7 * 86400000)
+    .toISOString()
+    .slice(0, 10);
+  const weekEnd = new Date(Date.parse(weekStart) + 6 * 86400000).toISOString().slice(0, 10);
+  const events = calendarOccurrences(
+    Array.from(new Map([...(data?.events || []), ...remoteEvents].map((e) => [e.id, e])).values()),
+    weekStart,
+    weekEnd,
   ).sort((a, b) => a.start.localeCompare(b.start));
   const title =
     page === 'board'
@@ -359,7 +397,11 @@ export default function Workspace({ view }: { view: string[] }) {
         key={item.id}
         item={item}
         source={source}
-        date={dateLabel(item.dueDate || item.startDateTime, timezone)}
+        date={
+          item.recurrence
+            ? `${item.recurrence.days.join('/')} · ${dateLabel(nextMeeting(item, new Date()), timezone) || 'Term ended'}`
+            : dateLabel(item.dueDate || item.startDateTime, timezone)
+        }
         arriving={arriving.includes(item.id)}
         completing={completing.includes(item.id)}
         onEdit={() => setDetail(item)}
@@ -394,10 +436,9 @@ export default function Workspace({ view }: { view: string[] }) {
         reviewCount={
           items.filter(
             (i) =>
+              i.tier !== 'optional' &&
               !['done', 'archived'].includes(i.status) &&
-              (i.needsClarification ||
-                i.status === 'inbox' ||
-                ['suggested', 'failed'].includes(i.calendarStatus)),
+              (i.needsClarification || i.status === 'inbox' || i.calendarStatus === 'failed'),
           ).length
         }
         date={dateLabel(s.createdAt, timezone)}
@@ -1031,6 +1072,7 @@ export default function Workspace({ view }: { view: string[] }) {
                           {active
                             .filter(
                               (i) =>
+                                i.tier !== 'optional' &&
                                 i.calendarStatus !== 'synced' &&
                                 (i.startDateTime || i.dueDate
                                   ? itemDay((i.startDateTime || i.dueDate)!, timezone)
@@ -1100,6 +1142,22 @@ export default function Workspace({ view }: { view: string[] }) {
                     <ChevronLeft size={16} />
                     All spaces
                   </Link>
+                  {data.projects.find((p) => p.id === view[1])?.metadata && (
+                    <section className="content-panel course-metadata">
+                      <h2>Course details</h2>
+                      <dl>
+                        {Object.entries(data.projects.find((p) => p.id === view[1])!.metadata!).map(
+                          ([key, value]) =>
+                            value && (
+                              <Fragment key={key}>
+                                <dt>{key.replace(/([A-Z])/g, ' $1')}</dt>
+                                <dd>{value}</dd>
+                              </Fragment>
+                            ),
+                        )}
+                      </dl>
+                    </section>
+                  )}
                   <div className="results-grid">
                     {active.filter((i) => i.projectId === view[1]).map((i) => renderCard(i))}
                   </div>
@@ -1124,7 +1182,7 @@ export default function Workspace({ view }: { view: string[] }) {
                     <input
                       autoFocus
                       aria-label="Search your pile"
-                      placeholder="Try “what did I say about Maya?”"
+                      placeholder="Find anything you've piled away..."
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                     />
@@ -1144,23 +1202,39 @@ export default function Workspace({ view }: { view: string[] }) {
                     <button onClick={() => setQuery('recruiter')}>recruiter</button>
                     <button onClick={() => setQuery('Maya')}>Maya</button>
                   </div>
-                  {answer && (
-                    <div className="memory-answer">
-                      <FileText size={20} />
-                      <p>{answer}</p>
-                      <small>Backboard memory · may include older context</small>
-                    </div>
-                  )}
                   <div className="board-toolbar">
                     <h2>
-                      {searching ? 'Looking through your pile…' : `${results.length} things found`}
+                      {searching
+                        ? 'Looking through your pile…'
+                        : `${results.length + sourceResults.length} matches`}
                     </h2>
                   </div>
-                  <div className="results-grid">{results.map((i) => renderCard(i))}</div>
-                  {!searching && !results.length && (
+                  <div className="results-grid">
+                    {results.map((i) => (
+                      <div key={i.id}>
+                        {renderCard(i)}
+                        <SearchExcerpt
+                          text={i.evidence || i.description || i.title}
+                          query={query}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="source-grid search-source-results">
+                    {sourceResults.map((source) => (
+                      <div key={source.id}>
+                        {sourceRow(source)}
+                        <SearchExcerpt
+                          text={source.transcription || source.rawText}
+                          query={query}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {!searching && !results.length && !sourceResults.length && (
                     <div className="empty-page">
                       <Search size={38} />
-                      <h3>Couldn’t find that in your pile.</h3>
+                      <h3>Nothing in your pile matches that yet.</h3>
                       <p>Try a name, a project, or a few words you remember.</p>
                       <button className="small-button" onClick={() => setQuery('')}>
                         Clear search
@@ -1171,55 +1245,11 @@ export default function Workspace({ view }: { view: string[] }) {
               )}
               {page === 'settings' && (
                 <div className="settings-grid">
-                  <section className="content-panel settings-panel">
-                    <h2>Your connections</h2>
-                    <div className="setting-row">
-                      <span className="setting-icon">
-                        <CalendarDays />
-                      </span>
-                      <div>
-                        <h3>Google Calendar</h3>
-                        <p>
-                          {data.config.googleConnected
-                            ? 'Connected. Approved items go to your primary calendar.'
-                            : data.config.googleConfigured
-                              ? 'Connect once. Keep your real calendar in the loop.'
-                              : 'Demo calendar is ready. Google OAuth credentials can be added on the server.'}
-                        </p>
-                      </div>
-                      {data.config.googleConfigured ? (
-                        <a className="small-button" href={googleConnectPath} target="_self">
-                          {data.config.googleConnected ? 'Reconnect' : 'Connect'}
-                          <ExternalLink size={14} />
-                        </a>
-                      ) : (
-                        <span className="mode-pill">Demo</span>
-                      )}
-                    </div>
-                    <div className="setting-row">
-                      <span className="setting-icon">
-                        <FileText />
-                      </span>
-                      <div>
-                        <h3>Understanding your pile</h3>
-                        <p>
-                          {data.config.ai}.{' '}
-                          {data.config.voice
-                            ? 'Voice transcription and image understanding are available.'
-                            : 'Text uses local rules. Voice has a sample transcript; the sample flyer works offline.'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="setting-row">
-                      <span className="setting-icon">
-                        <Clock />
-                      </span>
-                      <div>
-                        <h3>Your timezone</h3>
-                        <p>{timezone} · Dates are interpreted where you are.</p>
-                      </div>
-                    </div>
-                  </section>
+                  <CalendarSettings
+                    config={data.config}
+                    preferences={data.preferences}
+                    onChange={refresh}
+                  />
                   <section className="content-panel settings-panel">
                     <h2>A quick way to get the hang of it.</h2>
                     <p>
@@ -1264,7 +1294,7 @@ export default function Workspace({ view }: { view: string[] }) {
           <span>Your thoughts. A little more room.</span>
         </footer>
       </div>
-      {toast && (
+      {toast && !review && !detail && !voice && !sourcePreview && (
         <div className="toast" role="status">
           <span>
             <Check size={16} />
@@ -1287,6 +1317,7 @@ export default function Workspace({ view }: { view: string[] }) {
       >
         {detail && (
           <ItemEditor
+            timezone={timezone}
             key={detail.id}
             item={data?.items.find((i) => i.id === detail.id) || detail}
             source={data?.sources.find((s) => s.id === detail.sourceId)}
@@ -1321,7 +1352,11 @@ export default function Workspace({ view }: { view: string[] }) {
       <Modal
         open={!!review}
         onClose={() => setReview(undefined)}
-        title="A few things found their place."
+        title={
+          data?.sources.find((s) => s.id === review)?.metadata
+            ? 'Syllabus ready'
+            : 'A few things found their place.'
+        }
         description={
           data?.sources.find((s) => s.id === review)?.summary ||
           'Review what Pile found before adding anything to your calendar.'
@@ -1330,12 +1365,18 @@ export default function Workspace({ view }: { view: string[] }) {
       >
         {review && (
           <ReviewPanel
-            items={data?.items.filter((i) => i.sourceId === review) || []}
-            calendarName={data?.config.calendar || 'Demo calendar'}
-            onEdit={(i) => {
-              setReview(undefined);
-              setDetail(i);
-            }}
+            items={
+              data?.items.filter((i) => i.sourceId === review && i.status !== 'archived') || []
+            }
+            timezone={timezone}
+            source={data?.sources.find((s) => s.id === review)}
+            onRefresh={refresh}
+            calendarName={
+              (data?.config.calendar || 'Demo calendar') +
+              (data?.config.googleConnected
+                ? ` · ${data.preferences.calendarName || 'Primary calendar'}`
+                : '')
+            }
             onApprove={async (ids, calendar) => {
               for (const id of ids) {
                 const i = data!.items.find((x) => x.id === id)!;
@@ -1347,7 +1388,14 @@ export default function Workspace({ view }: { view: string[] }) {
               await refresh();
               setReview(undefined);
               setToast(
-                calendar ? 'Your calendar has a little more clarity.' : 'Saved to your board.',
+                calendar
+                  ? `${
+                      ids.filter((id) => {
+                        const i = data!.items.find((x) => x.id === id)!;
+                        return !!(i.dueDate || i.startDateTime);
+                      }).length
+                    } added to ${data?.config.calendar}.`
+                  : 'Saved to your board.',
               );
             }}
           />
@@ -1413,9 +1461,9 @@ export default function Workspace({ view }: { view: string[] }) {
           <VoiceCapture
             real={data?.config.voice || false}
             demo={data?.config.demo || false}
-            onCapture={async (t) => {
+            onCapture={async (t, duration) => {
               setVoice(false);
-              await capture(t, 'voice');
+              await capture(t, 'voice', duration);
             }}
           />
         )}
@@ -1524,6 +1572,7 @@ export default function Workspace({ view }: { view: string[] }) {
   );
 }
 function ItemEditor({
+  timezone,
   item,
   source,
   onSave,
@@ -1531,6 +1580,7 @@ function ItemEditor({
   onArchive,
   onDelete,
 }: {
+  timezone: string;
   item: Item;
   source?: Source;
   onSave: (patch: unknown) => Promise<void>;
@@ -1559,7 +1609,7 @@ function ItemEditor({
         const f = new FormData(e.currentTarget);
         const d = String(f.get('date') || '');
         const time = String(f.get('time') || '');
-        const date = d ? (time ? new Date(d + 'T' + time).toISOString() : d) : null;
+        const date = d ? (time ? fromZonedTime(d + 'T' + time, timezone).toISOString() : d) : null;
         perform(() =>
           onSave({
             title: f.get('title'),
@@ -1571,7 +1621,21 @@ function ItemEditor({
             ...(type === 'event'
               ? { startDateTime: date, dueDate: null }
               : { dueDate: date, startDateTime: null }),
-            endDateTime: null,
+            endDateTime:
+              f.get('endTime') && d
+                ? fromZonedTime(
+                    String(f.get('endDate') || d) + 'T' + f.get('endTime'),
+                    timezone,
+                  ).toISOString()
+                : null,
+            tier: f.get('tier'),
+            recurrence: f.get('recurring')
+              ? {
+                  days: f.getAll('days'),
+                  until: String(f.get('until') || '') || undefined,
+                  timezone: item.recurrence?.timezone || timezone,
+                }
+              : null,
             allDay: !time,
             needsClarification: false,
             confidence: 1,
@@ -1590,7 +1654,7 @@ function ItemEditor({
           {item.clarificationQuestion || 'Please confirm the details.'}
         </div>
       )}
-      <fieldset disabled={busy || item.calendarStatus === 'synced'}>
+      <fieldset disabled={busy}>
         <label className="field-label">
           Title
           <input name="title" required defaultValue={item.title} maxLength={240} />
@@ -1625,10 +1689,7 @@ function ItemEditor({
               name="date"
               defaultValue={
                 item.startDateTime || item.dueDate
-                  ? itemDay(
-                      (item.startDateTime || item.dueDate)!,
-                      Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    )
+                  ? itemDay((item.startDateTime || item.dueDate)!, timezone)
                   : ''
               }
             />
@@ -1643,6 +1704,7 @@ function ItemEditor({
                   ? new Date(item.startDateTime || item.dueDate!).toLocaleTimeString('en-GB', {
                       hour: '2-digit',
                       minute: '2-digit',
+                      timeZone: timezone,
                     })
                   : ''
               }
@@ -1665,6 +1727,61 @@ function ItemEditor({
             </select>
           </label>
         </div>
+        <div className="field-row">
+          <label className="field-label">
+            End date
+            <input
+              type="date"
+              name="endDate"
+              defaultValue={item.endDateTime ? itemDay(item.endDateTime, timezone) : ''}
+            />
+          </label>
+          <label className="field-label">
+            End time
+            <input
+              type="time"
+              name="endTime"
+              defaultValue={
+                item.endDateTime?.includes('T')
+                  ? formatInTimeZone(item.endDateTime, timezone, 'HH:mm')
+                  : ''
+              }
+            />
+          </label>
+        </div>
+        <label className="field-label">
+          Keep under
+          <select name="tier" defaultValue={item.tier || 'important'}>
+            <option value="important">Important / Calendar</option>
+            <option value="optional">Optional</option>
+            <option value="reference">Useful references</option>
+          </select>
+        </label>
+        <details className="recurrence-editor" open={!!item.recurrence}>
+          <summary>Recurring schedule</summary>
+          <label>
+            <input type="checkbox" name="recurring" defaultChecked={!!item.recurrence} /> Repeat
+            weekly
+          </label>
+          <div className="weekday-choices">
+            {(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'] as const).map((day) => (
+              <label key={day}>
+                <input
+                  type="checkbox"
+                  name="days"
+                  value={day}
+                  defaultChecked={item.recurrence?.days.includes(day)}
+                />
+                {day}
+              </label>
+            ))}
+          </div>
+          <label className="field-label">
+            Term end
+            <input type="date" name="until" defaultValue={item.recurrence?.until} />
+          </label>
+          <small>Schedule timezone: {item.recurrence?.timezone || timezone}</small>
+        </details>
         <label className="field-label">
           Location
           <input name="location" defaultValue={item.location} />
@@ -1673,7 +1790,7 @@ function ItemEditor({
       <details className="source-context">
         <summary>
           <Icon name={source?.type || 'text'} />
-          From your {source?.type || 'text'} capture
+          From {source?.fileName || `your ${source?.type || 'text'} capture`}
           <ChevronDown size={15} />
         </summary>
         <p>{source?.rawText || item.sourceExcerpt || source?.fileName}</p>
@@ -1690,7 +1807,7 @@ function ItemEditor({
           <>
             <span className="synced">
               <CheckCheck size={16} />
-              Synced · remove before editing
+              Linked to calendar · edits update the event
             </span>
             <button
               type="button"
@@ -1715,6 +1832,21 @@ function ItemEditor({
           )
         )}
       </div>
+      {(item.startDateTime || item.dueDate) && (
+        <button
+          type="button"
+          className="small-button apple-export"
+          disabled={busy || item.needsClarification}
+          onClick={() =>
+            perform(async () => {
+              await downloadCalendar([item.id]);
+              setError('');
+            })
+          }
+        >
+          Add to Apple Calendar · .ics
+        </button>
+      )}
       <div className="modal-actions">
         <button
           className="text-button"
@@ -1728,13 +1860,13 @@ function ItemEditor({
         <button
           className="text-button danger"
           type="button"
-          disabled={busy || item.calendarStatus === 'synced'}
+          disabled={busy}
           onClick={() => perform(onDelete)}
         >
           <Trash2 size={15} />
           Delete
         </button>
-        <button className="primary-button" disabled={busy || item.calendarStatus === 'synced'}>
+        <button className="primary-button" disabled={busy}>
           {busy ? <LoaderCircle className="spin" size={17} /> : <Check size={17} />}
           Save changes
         </button>
@@ -1744,96 +1876,266 @@ function ItemEditor({
 }
 function ReviewPanel({
   items,
+  source,
+  timezone,
   calendarName,
-  onEdit,
+  onRefresh,
   onApprove,
 }: {
   items: Item[];
+  source?: Source;
+  timezone: string;
   calendarName: string;
-  onEdit: (i: Item) => void;
+  onRefresh: () => Promise<unknown>;
   onApprove: (ids: string[], calendar: boolean) => Promise<void>;
 }) {
-  const [selected, setSelected] = useState(
-    items.filter((i) => !i.needsClarification && i.calendarStatus !== 'synced').map((i) => i.id),
+  const important = items.filter(
+    (i) =>
+      !['optional', 'reference'].includes(i.tier || '') &&
+      !i.needsClarification &&
+      i.calendarStatus !== 'synced',
   );
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [selected, setSelected] = useState(important.map((i) => i.id));
+  const [busy, setBusy] = useState(false),
+    [error, setError] = useState(''),
+    [confirmation, setConfirmation] = useState(false),
+    [editing, setEditing] = useState<Item>(),
+    [exported, setExported] = useState(false);
   const dated = items.filter((i) => selected.includes(i.id) && (i.dueDate || i.startDateTime));
   async function approve(calendar: boolean) {
     setBusy(true);
+    setError('');
     try {
       await onApprove(selected, calendar);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not approve.');
+      await onRefresh();
     } finally {
       setBusy(false);
     }
   }
-  return (
-    <div>
-      {error && (
-        <div role="alert" className="error-banner">
-          {error}
+  if (editing)
+    return (
+      <div className="review-edit">
+        <button className="text-button" onClick={() => setEditing(undefined)}>
+          <ChevronLeft size={16} />
+          Back to import
+        </button>
+        <ItemEditor
+          key={editing.id}
+          item={items.find((i) => i.id === editing.id) || editing}
+          source={source}
+          timezone={timezone}
+          onSave={async (patch) => {
+            await api('items/' + editing.id, 'PATCH', patch);
+            await onRefresh();
+            setEditing(undefined);
+          }}
+          onCalendar={async (remove) => {
+            await api('calendar/' + editing.id, remove ? 'DELETE' : 'POST');
+            await onRefresh();
+          }}
+          onArchive={async () => {
+            await api('items/' + editing.id, 'PATCH', { status: 'archived' });
+            await onRefresh();
+            setEditing(undefined);
+          }}
+          onDelete={async () => {
+            await api('items/' + editing.id, 'DELETE');
+            await onRefresh();
+            setSelected(selected.filter((id) => id !== editing.id));
+            setEditing(undefined);
+          }}
+        />
+      </div>
+    );
+  if (confirmation)
+    return (
+      <div className="calendar-confirmation">
+        <CalendarDays size={36} />
+        <h3>Add to {calendarName.startsWith('Google') ? 'Google Calendar' : 'demo calendar'}</h3>
+        <p>
+          {dated.filter((i) => !i.recurrence).length} dates ·{' '}
+          {dated.filter((i) => i.recurrence).length} recurring schedules
+        </p>
+        <p>
+          Calendar: <strong>{calendarName}</strong>
+        </p>
+        <p className="subtle">
+          Recurring schedules end on their confirmed term date. Already linked items are skipped.
+        </p>
+        {error && (
+          <p role="alert" className="error-banner">
+            {error}
+          </p>
+        )}
+        <div className="modal-actions">
+          <button className="small-button" disabled={busy} onClick={() => setConfirmation(false)}>
+            Cancel
+          </button>
+          <button className="primary-button" disabled={busy} onClick={() => approve(true)}>
+            {busy ? 'Adding…' : `Confirm add ${dated.length}`}
+          </button>
         </div>
+      </div>
+    );
+  const groups = [
+    [
+      'Calendar',
+      items.filter((i) => i.tier !== 'optional' && i.tier !== 'reference' && i.type === 'event'),
+    ],
+    [
+      'Tasks & deadlines',
+      items.filter((i) => i.tier !== 'optional' && i.tier !== 'reference' && i.type !== 'event'),
+    ],
+    ['Optional schedule', items.filter((i) => i.tier === 'optional')],
+    ['Useful references', items.filter((i) => i.tier === 'reference')],
+  ] as const;
+  return (
+    <div className="review-sheet">
+      {error && (
+        <p role="alert" className="error-banner">
+          {error}
+        </p>
       )}
       <div className="review-summary">
-        <span>{items.length} things found</span>
-        <span>{items.filter((i) => i.dueDate || i.startDateTime).length} dates</span>
-        <span>{calendarName}</span>
+        <span>
+          <strong>
+            {
+              items.filter(
+                (i) => i.tier !== 'optional' && !i.recurrence && (i.dueDate || i.startDateTime),
+              ).length
+            }
+          </strong>{' '}
+          dates
+        </span>
+        <span>
+          <strong>{items.filter((i) => i.tier !== 'optional' && i.recurrence).length}</strong>{' '}
+          schedules
+        </span>
+        <span>
+          <strong>{items.filter((i) => i.tier === 'optional').length}</strong> optional
+        </span>
+      </div>
+      <div className="review-select">
+        <button className="text-button" onClick={() => setSelected(important.map((i) => i.id))}>
+          Select all important
+        </button>
+        <button className="text-button" onClick={() => setSelected([])}>
+          Clear
+        </button>
       </div>
       <div className="review-list">
-        {items.map((i) => (
-          <div className="review-row" key={i.id}>
-            <input
-              aria-label={`Select ${i.title}`}
-              type="checkbox"
-              checked={selected.includes(i.id)}
-              disabled={i.needsClarification || i.calendarStatus === 'synced' || busy}
-              onChange={(e) =>
-                setSelected(
-                  e.target.checked ? [...selected, i.id] : selected.filter((id) => id !== i.id),
-                )
-              }
-            />
-            <span className="review-icon">
-              <Icon name={i.type} size={20} />
-            </span>
-            <div>
-              <strong>{i.title}</strong>
-              <span>
-                {i.type} · {dateLabel(i.startDateTime || i.dueDate) || 'No date'}
-                {i.location && ' · ' + i.location}
-              </span>
-              {i.needsClarification && <small>{i.clarificationQuestion}</small>}
-              {i.calendarStatus === 'synced' && <small>Synced to calendar</small>}
-            </div>
-            <button className="text-button" onClick={() => onEdit(i)}>
-              Edit
-            </button>
-          </div>
-        ))}
+        {groups
+          .filter(([, group]) => group.length)
+          .map(([label, group]) => (
+            <section
+              className={'review-group ' + (label === 'Optional schedule' ? 'optional-group' : '')}
+              key={label}
+            >
+              <h3>{label}</h3>
+              {group.map((i) => (
+                <div className="review-row" key={i.id}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${i.title}`}
+                    checked={selected.includes(i.id)}
+                    disabled={busy || i.needsClarification || i.calendarStatus === 'synced'}
+                    onChange={(e) =>
+                      setSelected(
+                        e.target.checked
+                          ? [...selected, i.id]
+                          : selected.filter((id) => id !== i.id),
+                      )
+                    }
+                  />
+                  <div>
+                    <strong>{i.title}</strong>
+                    <span>
+                      {i.recurrence
+                        ? `${i.recurrence.days.join(' / ')} · ${i.startDateTime?.includes('T') ? formatInTimeZone(i.startDateTime, i.recurrence.timezone, 'h:mm a') : 'Time to confirm'} · through ${i.recurrence.until || '?'}`
+                        : dateLabel(i.startDateTime || i.dueDate, timezone) || i.type}
+                      {i.location && ` · ${i.location}`}
+                    </span>
+                    {i.needsClarification && <small>{i.clarificationQuestion}</small>}
+                    {i.calendarStatus === 'synced' && <small>Already linked to calendar</small>}
+                  </div>
+                  <button
+                    className="text-button"
+                    aria-label={`Edit candidate ${i.title}`}
+                    onClick={() => setEditing(i)}
+                  >
+                    Edit
+                  </button>
+                </div>
+              ))}
+            </section>
+          ))}
       </div>
-      <p className="review-note">
-        Choose what to keep. Uncertain details need a quick edit first. Only selected, dated items
-        will go to your calendar.
-      </p>
-      <div className="modal-actions">
+      {source && (
+        <details className="review-reference">
+          <summary>View source details · {source.fileName || 'Original capture'}</summary>
+          {source.metadata && (
+            <dl>
+              {Object.entries(source.metadata).map(
+                ([k, v]) =>
+                  v && (
+                    <Fragment key={k}>
+                      <dt>{k.replace(/([A-Z])/g, ' $1')}</dt>
+                      <dd>{v}</dd>
+                    </Fragment>
+                  ),
+              )}
+            </dl>
+          )}
+          <p>{source.summary}</p>
+          {source.fileUrl && (
+            <a href={source.fileUrl} target="_blank" rel="noreferrer">
+              Open original document
+            </a>
+          )}
+        </details>
+      )}
+      {!items.length && <p>Your original is saved. There are no new actions or dates to manage.</p>}
+      <div className="modal-actions review-actions">
         <button
           className="small-button"
           disabled={busy || !selected.length}
           onClick={() => approve(false)}
         >
-          Save only ({selected.length})
+          Save to Pile ({selected.length})
         </button>
         <button
           className="primary-button"
           disabled={busy || !dated.length}
-          onClick={() => approve(true)}
+          onClick={() => setConfirmation(true)}
         >
-          {busy ? <LoaderCircle className="spin" size={17} /> : <CalendarPlus size={17} />}
+          <CalendarPlus size={17} />
           Add {dated.length} to calendar
         </button>
       </div>
+      <button
+        className="text-button apple-export"
+        disabled={busy || !dated.length}
+        onClick={async () => {
+          setBusy(true);
+          try {
+            await downloadCalendar(dated.map((i) => i.id));
+            setExported(true);
+          } catch (e) {
+            setError(e instanceof Error ? e.message : 'Export failed.');
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        Add to Apple Calendar · .ics
+      </button>
+      {exported && (
+        <p role="status" className="subtle">
+          Exported. Open the calendar file in Apple Calendar to add these events.
+        </p>
+      )}
     </div>
   );
 }
@@ -1844,7 +2146,7 @@ function VoiceCapture({
 }: {
   real: boolean;
   demo: boolean;
-  onCapture: (t: string) => Promise<void>;
+  onCapture: (t: string, duration?: number) => Promise<void>;
 }) {
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -1853,6 +2155,8 @@ function VoiceCapture({
   const [activity, setActivity] = useState('');
   const [error, setError] = useState('');
   const recorder = useRef<MediaRecorder | null>(null);
+  const startedAt = useRef(0);
+  const recordedDuration = useRef<number | undefined>(undefined);
   const stream = useRef<MediaStream | null>(null);
   const unmounted = useRef(false);
   useEffect(() => {
@@ -1865,7 +2169,10 @@ function VoiceCapture({
   }, []);
   useEffect(() => {
     if (!recording) return;
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000);
+    const t = setInterval(
+      () => setSeconds(Math.floor((performance.now() - startedAt.current) / 1000)),
+      250,
+    );
     return () => clearInterval(t);
   }, [recording]);
   async function start() {
@@ -1880,11 +2187,17 @@ function VoiceCapture({
         stream.current.getTracks().forEach((track) => track.stop());
         return;
       }
-      const rec = new MediaRecorder(stream.current);
+      const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'].find(
+        (m) =>
+          typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(m),
+      );
+      const rec = new MediaRecorder(stream.current, mime ? { mimeType: mime } : undefined);
       recorder.current = rec;
       const chunks: BlobPart[] = [];
       rec.ondataavailable = (e) => chunks.push(e.data);
       rec.onstop = async () => {
+        recordedDuration.current = Math.max(0.001, (performance.now() - startedAt.current) / 1000);
+        setSeconds(Math.floor(recordedDuration.current));
         stream.current?.getTracks().forEach((t) => t.stop());
         if (unmounted.current) return;
         setRecording(false);
@@ -1894,7 +2207,7 @@ function VoiceCapture({
           );
           return;
         }
-        setActivity('Transcribing your recording…');
+        setActivity('Transcribing...');
         setBusy(true);
         try {
           const form = new FormData();
@@ -1913,7 +2226,15 @@ function VoiceCapture({
         }
       };
       setSeconds(0);
-      rec.start();
+      setTranscript('');
+      rec.onerror = () => {
+        stream.current?.getTracks().forEach((t) => t.stop());
+        setRecording(false);
+        setError('Recording stopped unexpectedly. Please try again.');
+      };
+      startedAt.current = performance.now();
+      recordedDuration.current = undefined;
+      rec.start(1000);
       setRecording(true);
     } catch {
       setError('Microphone access is unavailable. You can type a transcript or use the sample.');
@@ -1930,6 +2251,7 @@ function VoiceCapture({
       form.set('demo', 'true');
       const r = await api<{ text: string }>('transcribe', 'POST', form);
       setTranscript(r.text);
+      recordedDuration.current = undefined;
       setSeconds(0);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load sample.');
@@ -1940,7 +2262,9 @@ function VoiceCapture({
   return (
     <div className="voice-panel">
       <span className="mode-pill">
-        {real ? 'Voice transcription connected' : 'Demo voice · sample transcript available'}
+        {real
+          ? 'ElevenLabs · speech-to-text configured'
+          : 'Demo voice · sample transcript available'}
       </span>
       <div aria-hidden="true" className={'waveform ' + (recording ? 'recording' : '')}>
         {Array.from({ length: 29 }, (_, n) => (
@@ -1996,12 +2320,29 @@ function VoiceCapture({
         <button
           className="primary-button"
           disabled={!transcript.trim() || busy || recording}
-          onClick={() => onCapture(transcript)}
+          onClick={() => onCapture(transcript, recordedDuration.current)}
         >
-          Sort my words
+          Sort this
           <ArrowRight size={16} />
         </button>
       </div>
     </div>
+  );
+}
+
+function SearchExcerpt({ text, query }: { text: string; query: string }) {
+  const tokens = searchTokens(query);
+  return (
+    <p className="search-excerpt">
+      {matchingExcerpt(text, query)
+        .split(/(\s+)/)
+        .map((word, n) =>
+          searchTokens(word).some((t) => tokens.includes(t)) ? (
+            <mark key={n}>{word}</mark>
+          ) : (
+            <Fragment key={n}>{word}</Fragment>
+          ),
+        )}
+    </p>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import { useState } from 'react';
 import { ArrowUpRight, FileText } from 'lucide-react';
 import type { Source } from '@/lib/model';
 export function SourceCard({
@@ -58,7 +59,11 @@ export function SourceCard({
               : source.rawText.slice(0, 90) || 'Text capture')}
         </strong>
         <span className="source-meta">
-          {source.type} · {date} · {count} items
+          {source.type}
+          {source.durationSeconds
+            ? ` · ${Math.floor(source.durationSeconds / 60)}:${String(Math.floor(source.durationSeconds % 60)).padStart(2, '0')}`
+            : ''}{' '}
+          · {date} · {count} items
         </span>
       </button>
       <div className="source-card-bottom">
@@ -77,6 +82,8 @@ export function SourceCard({
   );
 }
 export function SourcePreview({ source }: { source: Source }) {
+  const [page, setPage] = useState(1);
+  const [failed, setFailed] = useState(false);
   return (
     <>
       {source.type === 'image' && source.fileUrl && (
@@ -91,17 +98,58 @@ export function SourcePreview({ source }: { source: Source }) {
         </div>
       )}
       {source.type === 'pdf' && (
-        <div className="pdf-text-preview">
-          <div>
-            <FileText size={20} />
-            <strong>{source.fileName}</strong>
-            <span>Extracted text</span>
+        <div className="pdf-preview">
+          {source.fileUrl && !failed && (
+            <Image
+              key={page}
+              className="pdf-rendered-page"
+              src={`${source.fileUrl}?preview=1&page=${page}`}
+              width={1000}
+              height={1294}
+              unoptimized
+              alt={`PDF page ${page} of ${source.fileName}`}
+              onError={() => setFailed(true)}
+            />
+          )}
+          <div className="pdf-page-controls">
+            <button
+              className="small-button"
+              disabled={page <= 1}
+              onClick={() => {
+                setPage(page - 1);
+                setFailed(false);
+              }}
+            >
+              Previous page
+            </button>
+            <span>
+              Page {page}
+              {source.pageCount ? ` of ${source.pageCount}` : ''}
+            </span>
+            <button
+              className="small-button"
+              disabled={failed || page >= (source.pageCount || 1)}
+              onClick={() => setPage(page + 1)}
+            >
+              Next page
+            </button>
           </div>
-          <p>{source.rawText || 'This PDF has no readable text. Open the original file below.'}</p>
+          {failed && (
+            <p className="subtle">
+              No preview for this page. Open the original or read the extracted text.
+            </p>
+          )}
+          <details className="pdf-text-preview">
+            <summary>Extracted text</summary>
+            <p>{source.rawText}</p>
+          </details>
         </div>
       )}
       {source.type === 'voice' && (
-        <p className="source-kind-label">Voice transcript · audio is not retained</p>
+        <p className="source-kind-label">
+          Voice transcript{source.durationSeconds ? ` · ${source.durationSeconds} seconds` : ''} ·
+          audio is not retained
+        </p>
       )}
       {source.type !== 'pdf' && (
         <p className="source-text">

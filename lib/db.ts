@@ -1,6 +1,6 @@
 import { PGlite } from '@electric-sql/pglite';
 import { Pool } from 'pg';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, readdir } from 'node:fs/promises';
 import path from 'node:path';
 export interface DB {
   query<T>(sql: string, params?: unknown[]): Promise<{ rows: T[] }>;
@@ -8,8 +8,10 @@ export interface DB {
   close(): Promise<void>;
 }
 export async function openDB(location?: string): Promise<DB> {
-  if (process.env.DATABASE_URL && !location) {
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  if ((process.env.TIGER_DATABASE_URL || process.env.DATABASE_URL) && !location) {
+    const pool = new Pool({
+      connectionString: process.env.TIGER_DATABASE_URL || process.env.DATABASE_URL,
+    });
     const db: DB = {
       query: async <T>(s: string, p?: unknown[]) => ({
         rows: (await pool.query(s, p)).rows as T[],
@@ -53,8 +55,12 @@ export async function openDB(location?: string): Promise<DB> {
   return wrap(pg);
 }
 export async function migrate(db: DB) {
-  const sql = await readFile(path.join(process.cwd(), 'migrations/001_initial.sql'), 'utf8');
-  for (const statement of sql.split(';').filter((s) => s.trim())) await db.query(statement);
+  for (const file of (await readdir(path.join(process.cwd(), 'migrations')))
+    .filter((f) => f.endsWith('.sql'))
+    .sort()) {
+    const sql = await readFile(path.join(process.cwd(), 'migrations', file), 'utf8');
+    for (const statement of sql.split(';').filter((s) => s.trim())) await db.query(statement);
+  }
 }
 const globalDB = globalThis as unknown as { pileDB?: Promise<DB> };
 export function database() {

@@ -30,19 +30,43 @@ export async function parseImage(
         items: [
           {
             type: 'event' as const,
-            title: 'HackRice Closing Ceremony',
-            description: 'Celebrate the things we made together.',
-            startDateTime: '2026-09-20T15:00:00-05:00',
-            endDateTime: '2026-09-20T17:00:00-05:00',
+            title: 'Design Night',
+            description: 'Critique, snacks and open studio. Free admission.',
+            startDateTime: '2026-09-17T19:00:00-05:00',
             allDay: false,
-            location: 'RMC Grand Hall',
+            location: 'Rice Architecture · Anderson Hall',
             priority: 'medium' as const,
             confidence: 1,
             needsClarification: false,
-            project: 'HackRice',
+            project: 'Personal',
           },
         ],
       };
   }
   return provider.parseImage(bytes, mime, c);
+}
+
+export async function pdfPreview(bytes: Buffer, page: number) {
+  const parser = new PDFParse({ data: new Uint8Array(bytes) });
+  try {
+    const result = await parser.getScreenshot({
+      partial: [page],
+      desiredWidth: 1000,
+      imageDataUrl: false,
+      imageBuffer: true,
+    });
+    if (!result.pages[0]) throw new Error('PDF page not found.');
+    return result.pages[0].data;
+  } finally {
+    await parser.destroy();
+  }
+}
+
+export async function pdfPageCount(bytes: Buffer) {
+  const parser = new PDFParse({ data: new Uint8Array(bytes) });
+  try {
+    return (await parser.getInfo()).total;
+  } finally {
+    await parser.destroy();
+  }
 }

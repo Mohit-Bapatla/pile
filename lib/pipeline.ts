@@ -1,8 +1,9 @@
 import type { DB } from './db';
 import { aiProvider, MockAIProvider } from './ai';
-import { parseImage, pdfText } from './files';
+import { parseImage, pdfText, pdfPageCount } from './files';
 import { state, getSource, updateSource, commitExtraction } from './store';
 import { extractionSchema } from './model';
+import { filterExtraction } from './actionability';
 export async function processSource(db: DB, user: string, id: string) {
   const record = await getSource(db, user, id);
   if (!record) throw new Error('Source not found.');
@@ -17,6 +18,8 @@ export async function processSource(db: DB, user: string, id: string) {
   try {
     if (source.type === 'pdf' && !source.rawText)
       source.rawText = await pdfText(Buffer.from(record.file_data));
+    if (source.type === 'pdf' && record.file_data)
+      source.pageCount = await pdfPageCount(Buffer.from(record.file_data));
     const provider = aiProvider();
     const c = {
       now: new Date(),
@@ -40,7 +43,14 @@ export async function processSource(db: DB, user: string, id: string) {
       extraction = await new MockAIProvider().parseText(source.rawText, c);
       source.provider = 'Demo fallback · AI provider unavailable';
     }
-    return await commitExtraction(db, source, extractionSchema.parse(extraction));
+    return await commitExtraction(
+      db,
+      source,
+      filterExtraction(
+        extractionSchema.parse(extraction),
+        ['pdf', 'file'].includes(source.type) || source.rawText.split(/\n/).length > 5,
+      ),
+    );
   } catch (e) {
     source.processingStatus = 'error';
     source.error = e instanceof Error ? e.message : 'Could not sort this capture.';
