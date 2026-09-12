@@ -1,6 +1,8 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Fragment } from 'react';
 import Link from 'next/link';
+import { PileCard } from './pile-card';
+import { SourceCard, SourcePreview } from './source-card';
 import { useRouter } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
@@ -20,8 +22,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  MoreHorizontal,
-  Sparkles,
   Sun,
   Lightbulb,
   FileText,
@@ -132,11 +132,21 @@ function Modal({
   children: React.ReactNode;
   wide?: boolean;
 }) {
+  const returnFocus = useRef<HTMLElement | null>(null);
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="modal-overlay" />
-        <Dialog.Content className={'modal ' + (wide ? 'wide' : '')}>
+        <Dialog.Content
+          className={'modal ' + (wide ? 'wide' : '')}
+          onOpenAutoFocus={() => {
+            returnFocus.current = document.activeElement as HTMLElement;
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            if (returnFocus.current?.isConnected) returnFocus.current.focus();
+          }}
+        >
           <div className="modal-heading">
             <div>
               <Dialog.Title>{title}</Dialog.Title>
@@ -162,6 +172,9 @@ export default function Workspace({ view }: { view: string[] }) {
   const [toast, setToast] = useState('');
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
+  const [sorting, setSorting] = useState<{ label: string; done?: number }>();
+  const [arriving, setArriving] = useState<string[]>([]);
+  const [completing, setCompleting] = useState<string[]>([]);
   const [detail, setDetail] = useState<Item>();
   const [review, setReview] = useState<string>();
   const [voice, setVoice] = useState(false);
@@ -178,6 +191,13 @@ export default function Workspace({ view }: { view: string[] }) {
   const [remoteEvents, setRemoteEvents] = useState<CalendarEvent[]>([]);
   const [sourcePreview, setSourcePreview] = useState<Source>();
   const [newItem, setNewItem] = useState(false);
+  const sortingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (sortingTimer.current) clearTimeout(sortingTimer.current);
+    },
+    [],
+  );
   const fileInput = useRef<HTMLInputElement>(null);
   const captureInput = useRef<HTMLTextAreaElement>(null);
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -250,6 +270,10 @@ export default function Workspace({ view }: { view: string[] }) {
   }
   async function capture(content: string | File, type: 'text' | 'voice' = 'text') {
     if (busy) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const landing = new Promise((resolve) => setTimeout(resolve, reduced ? 0 : 800));
+    if (sortingTimer.current) clearTimeout(sortingTimer.current);
+    setSorting({ label: content instanceof File ? content.name : content.slice(0, 90) });
     setBusy(true);
     setError('');
     try {
@@ -266,7 +290,21 @@ export default function Workspace({ view }: { view: string[] }) {
       setText('');
       await refresh();
       const result = await api<{ items: Item[] }>('process/' + source.id, 'POST');
+      await landing;
+      setArriving(result.items.map((i) => i.id));
+      setSorting({
+        label:
+          source.fileName || (source.type === 'voice' ? 'Voice transcript' : 'Original thought'),
+        done: result.items.length,
+      });
       await refresh();
+      sortingTimer.current = setTimeout(
+        () => {
+          setSorting(undefined);
+          setArriving([]);
+        },
+        reduced ? 0 : 1400,
+      );
       setToast(`${result.items.length} things, a little more organized.`);
       if (
         source.type === 'pdf' ||
@@ -275,14 +313,12 @@ export default function Workspace({ view }: { view: string[] }) {
       )
         setReview(source.id);
     } catch (e) {
+      setSorting(undefined);
       setError(e instanceof Error ? e.message : 'Could not capture this.');
       await refresh();
     } finally {
       setBusy(false);
     }
-  }
-  async function update(item: Item, patch: unknown, message?: string) {
-    await act(() => api('items/' + item.id, 'PATCH', patch), message);
   }
 
   const active =
@@ -301,118 +337,123 @@ export default function Workspace({ view }: { view: string[] }) {
   ).sort((a, b) => a.start.localeCompare(b.start));
   const title =
     page === 'board'
-      ? 'A little less on your mind.'
+      ? 'A place to put it all.'
       : page === 'inbox'
-        ? 'Everything starts here.'
+        ? 'Your inbox.'
         : page === 'calendar'
-          ? 'Make room for what matters.'
+          ? 'The days ahead.'
           : page === 'projects'
             ? view[1]
               ? data?.projects.find((p) => p.id === view[1])?.name || 'Project'
-              : 'A place for every little thing.'
+              : 'Your project folders.'
             : page === 'search'
-              ? 'It’s somewhere in your pile.'
-              : 'Make yourself at home.';
+              ? 'Find that thing.'
+              : 'Your workspace.';
   const pending =
     data?.sources.filter((s) => ['queued', 'processing', 'error'].includes(s.processingStatus)) ||
     [];
   function renderCard(item: Item) {
+    const source = data?.sources.find((s) => s.id === item.sourceId);
     return (
-      <article
+      <PileCard
         key={item.id}
-        className={`pile-card ${item.type === 'idea' ? 'lilac' : item.project === 'HackRice' ? 'peach' : item.project === 'Calculus' ? 'butter' : item.project === 'Job Search' ? 'blue' : 'mint'} ${item.status === 'done' ? 'completed' : ''}`}
-        data-testid="item-card"
-      >
-        <div className="card-top">
-          <span className="eyebrow">
-            <Icon name={item.type} />
-            {item.type}
-          </span>
-          <button
-            className="icon-button more"
-            aria-label={`Edit ${item.title}`}
-            onClick={() => setDetail(item)}
-          >
-            <MoreHorizontal size={18} />
-          </button>
-        </div>
-        <button className="card-main" onClick={() => setDetail(item)}>
-          <h3>{item.title}</h3>
-          {item.description && <p>{item.description}</p>}
-        </button>
-        <div className="card-meta">
-          {(item.dueDate || item.startDateTime) && (
-            <span className={section(item, today, timezone) === 'Today' ? 'due-today' : ''}>
-              <Clock size={13} />
-              {dateLabel(item.dueDate || item.startDateTime, timezone)}
-            </span>
-          )}
-          {item.calendarStatus === 'synced' && (
-            <span className="synced">
-              <CheckCheck size={14} />
-              Synced
-            </span>
-          )}
-          {item.needsClarification && <span className="review-badge">Needs review</span>}
-        </div>
-        <div className="card-footer">
-          <span className="project-label">
-            <i />
-            {item.project || 'Unsorted'}
-          </span>
-          <div>
-            <Icon
-              name={data?.sources.find((s) => s.id === item.sourceId)?.type || 'text'}
-              size={14}
-            />
-            {!['idea', 'note', 'reference'].includes(item.type) && (
+        item={item}
+        source={source}
+        date={dateLabel(item.dueDate || item.startDateTime, timezone)}
+        arriving={arriving.includes(item.id)}
+        completing={completing.includes(item.id)}
+        onEdit={() => setDetail(item)}
+        onSource={() => setSourcePreview(source)}
+        onComplete={async () => {
+          try {
+            await api('items/' + item.id, 'PATCH', {
+              status: item.status === 'done' ? 'planned' : 'done',
+            });
+            setCompleting((ids) => [...ids, item.id]);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+              await new Promise((r) => setTimeout(r, 200));
+            await refresh();
+            setToast(item.status === 'done' ? 'Back on the board.' : 'One less thing.');
+          } catch (e) {
+            setError(e instanceof Error ? e.message : 'Could not update item.');
+          } finally {
+            setCompleting((ids) => ids.filter((id) => id !== item.id));
+          }
+        }}
+      />
+    );
+  }
+  function sourceRow(s: Source, compact = false) {
+    const items = data?.items.filter((i) => i.sourceId === s.id) || [];
+    return (
+      <SourceCard
+        key={s.id}
+        source={s}
+        compact={compact}
+        count={items.length}
+        reviewCount={
+          items.filter(
+            (i) =>
+              !['done', 'archived'].includes(i.status) &&
+              (i.needsClarification ||
+                i.status === 'inbox' ||
+                ['suggested', 'failed'].includes(i.calendarStatus)),
+          ).length
+        }
+        date={dateLabel(s.createdAt, timezone)}
+        onOpen={() => setSourcePreview(s)}
+        onReview={() => setReview(s.id)}
+      />
+    );
+  }
+  const inboxTray = data ? (
+    <div className="inbox-tray">
+      <div>
+        <Inbox size={19} />
+        <strong>Inbox</strong>
+        <span>{data.sources.length}</span>
+      </div>
+      <p className="inbox-description">The originals behind your day.</p>
+      <div className="inbox-sources">
+        {[...data.sources]
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+          .slice(0, 2)
+          .map((s) => sourceRow(s, true))}
+      </div>
+      <Link className="text-button" href="/app/inbox">
+        All captures <ArrowRight size={14} />
+      </Link>
+      {pending.map((s) => (
+        <div key={s.id} className="processing-row">
+          {s.processingStatus === 'error' ? (
+            <>
+              <span>{s.fileName || 'Capture'} needs another try.</span>
               <button
-                className="complete-button"
-                aria-label={
-                  item.status === 'done' ? `Reopen ${item.title}` : `Complete ${item.title}`
-                }
+                className="text-button"
                 onClick={() =>
-                  update(
-                    item,
-                    { status: item.status === 'done' ? 'planned' : 'done' },
-                    item.status === 'done' ? 'Back on the board.' : 'Off the board.',
-                  )
+                  act(() => api('process/' + s.id, 'POST'), 'Sorted. Ready to review.')
                 }
               >
-                <Check size={13} />
+                <RotateCcw size={14} />
+                Retry
               </button>
-            )}
-          </div>
+            </>
+          ) : (
+            <>
+              <LoaderCircle size={17} className="spin" />
+              <span>Sorting your pile…</span>
+            </>
+          )}
         </div>
-      </article>
-    );
-  }
-  function sourceRow(s: Source) {
-    const count = data?.items.filter((i) => i.sourceId === s.id).length || 0;
-    return (
-      <div className="source-row" key={s.id}>
-        <span className="source-icon">
-          <Icon name={s.type} size={22} />
-        </span>
-        <button className="source-open" onClick={() => setSourcePreview(s)}>
-          <strong>{s.fileName || s.rawText.slice(0, 90) || 'Image capture'}</strong>
-          <span>
-            {s.type} · {dateLabel(s.createdAt, timezone)} · {count} items
-          </span>
+      ))}
+      {inbox.length > 0 && (
+        <button className="text-button" onClick={() => setReview(inbox[0].sourceId)}>
+          A couple things need a human.
+          <ArrowRight size={16} />
         </button>
-        <span className={'status ' + (s.processingStatus === 'error' ? 'error-status' : '')}>
-          {s.processingStatus.replaceAll('_', ' ')}
-        </span>
-        <button
-          className="icon-button"
-          aria-label="Review source items"
-          onClick={() => setReview(s.id)}
-        >
-          <ArrowUpRight size={19} />
-        </button>
-      </div>
-    );
-  }
+      )}
+    </div>
+  ) : null;
   return (
     <div className="app-shell">
       <aside className={'sidebar ' + (menu ? 'mobile-open' : '')}>
@@ -423,70 +464,32 @@ export default function Workspace({ view }: { view: string[] }) {
           </span>
           pile<span className="brand-period">.</span>
         </Link>
-        <button className="workspace-switch" onClick={() => setOnboarding(true)}>
-          <span className="tiny-avatar">M</span>My little workspace
-          <ChevronDown size={14} />
-        </button>
         <nav>
           {nav.map(([label, href, NavIcon]) => (
             <Link
               key={href}
               href={href}
               className={(page === label.toLowerCase() ? 'active ' : '') + 'nav-link'}
+              aria-current={page === label.toLowerCase() ? 'page' : undefined}
+              onClick={() => setMenu(false)}
             >
               <NavIcon size={19} />
               {label}
               {label === 'Inbox' && inbox.length > 0 && (
                 <span className="count">{inbox.length}</span>
               )}
-              {label === 'Search' && <kbd>⌘ K</kbd>}
             </Link>
           ))}
         </nav>
-        <div className="sidebar-projects">
-          <div className="sidebar-label">
-            YOUR SPACES
-            <Link href="/app/projects" aria-label="View projects">
-              <Plus size={15} />
-            </Link>
-          </div>
-          {data?.projects.slice(0, 6).map((p) => (
-            <Link href={'/app/projects/' + p.id} key={p.id}>
-              <i className={'project-dot ' + p.color} />
-              {p.name}
-            </Link>
-          ))}
-        </div>
         <div className="sidebar-bottom">
-          <div className="little-note">
-            <Sparkles size={18} />
-            <p>
-              A busy mind deserves
-              <br />a quiet place to land.
-            </p>
-            <span>That’s what we’re here for.</span>
-          </div>
           <Link
             className={'nav-link ' + (page === 'settings' ? 'active' : '')}
             href="/app/settings"
+            onClick={() => setMenu(false)}
           >
             <Settings size={19} />
             Settings
           </Link>
-          <div className="profile">
-            <span className="avatar">M</span>
-            <div>
-              <strong>My workspace</strong>
-              <small>{data?.config.demo ? 'Demo mode' : 'Personal workspace'}</small>
-            </div>
-            <button
-              className="icon-button"
-              aria-label="Show welcome guide"
-              onClick={() => setOnboarding(true)}
-            >
-              <MoreHorizontal size={18} />
-            </button>
-          </div>
         </div>
       </aside>
       <div className="app-content">
@@ -494,7 +497,8 @@ export default function Workspace({ view }: { view: string[] }) {
           <div>
             <button
               className="icon-button mobile-menu"
-              aria-label="Open navigation"
+              aria-label={menu ? 'Close navigation' : 'Open navigation'}
+              aria-expanded={menu}
               onClick={() => setMenu(!menu)}
             >
               <Menu size={21} />
@@ -520,6 +524,7 @@ export default function Workspace({ view }: { view: string[] }) {
           </div>
         </header>
         <main
+          className={page === 'board' ? 'board-page' : undefined}
           onDragOver={(e) => {
             if (e.dataTransfer.types.includes('Files')) {
               e.preventDefault();
@@ -545,13 +550,7 @@ export default function Workspace({ view }: { view: string[] }) {
           <section className="page-heading">
             <div>
               <div className="greeting">
-                {page === 'board' ? (
-                  <>
-                    YOUR MIND CAN EXHALE <span>✳</span>
-                  </>
-                ) : (
-                  <>YOUR {page.toUpperCase()}</>
-                )}
+                {page === 'board' ? <>YOUR EVERYDAY DESK</> : <>YOUR {page.toUpperCase()}</>}
               </div>
               <h1>{title}</h1>
               <p>
@@ -561,7 +560,7 @@ export default function Workspace({ view }: { view: string[] }) {
                     <strong>
                       {active.filter((i) => section(i, today, timezone) === 'Today').length} things
                     </strong>{' '}
-                    that matter today. Let’s take them one at a time.
+                    for today. One thing at a time.
                   </>
                 ) : page === 'inbox' ? (
                   'The original thoughts, files, and moments behind your plan.'
@@ -599,7 +598,7 @@ export default function Workspace({ view }: { view: string[] }) {
             </div>
           )}
           {!data ? (
-            <div className="loading-state">
+            <div className="loading-state" role="status">
               <LoaderCircle className="spin" />
               Making a little room…
               <button
@@ -614,8 +613,7 @@ export default function Workspace({ view }: { view: string[] }) {
               {['board', 'inbox'].includes(page) && (
                 <section className={'capture-box ' + (busy ? 'processing' : '')}>
                   <div className="capture-label">
-                    <Sparkles size={16} />
-                    <span>A PLACE FOR EVERYTHING ON YOUR MIND</span>
+                    <span>DROP IT HERE. MAKE SENSE OF IT LATER.</span>
                     <span className="capture-shortcut">⌘ ↵ to sort</span>
                   </div>
                   <textarea
@@ -681,12 +679,32 @@ export default function Workspace({ view }: { view: string[] }) {
                   />
                 </section>
               )}
+              {sorting && (
+                <div
+                  className={'sorting-receipt ' + (sorting.done !== undefined ? 'sorted' : '')}
+                  role="status"
+                >
+                  <div className="split-papers" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+                  <div>
+                    <strong>{sorting.label}</strong>
+                    <span>
+                      {sorting.done !== undefined
+                        ? `${sorting.done} items found their place. Original saved in Inbox.`
+                        : 'Finding the tasks, dates, and ideas. Keeping your original attached…'}
+                    </span>
+                  </div>
+                </div>
+              )}
               {page === 'board' && (
                 <>
                   <div className="board-toolbar">
                     <div>
                       <h2>Your board</h2>
-                      <span className="subtle">A little structure. A lot less noise.</span>
+                      <span className="subtle">Everything in its own time.</span>
                     </div>
                     <div>
                       <button
@@ -704,122 +722,85 @@ export default function Workspace({ view }: { view: string[] }) {
                   </div>
                   <div className="board-with-rail">
                     <div className="board-area">
-                      {(inbox.length > 0 || pending.length > 0) && (
-                        <div className="inbox-tray">
-                          <div>
-                            <Inbox size={19} />
-                            <strong>In your inbox</strong>
-                            <span>{inbox.length + pending.length}</span>
-                          </div>
-                          {pending.map((s) => (
-                            <div key={s.id} className="processing-row">
-                              {s.processingStatus === 'error' ? (
-                                <>
-                                  <span>{s.fileName || 'Capture'} needs another try.</span>
-                                  <button
-                                    className="text-button"
-                                    onClick={() =>
-                                      act(
-                                        () => api('process/' + s.id, 'POST'),
-                                        'Sorted. Ready to review.',
-                                      )
-                                    }
-                                  >
-                                    <RotateCcw size={14} />
-                                    Retry
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <LoaderCircle size={17} className="spin" />
-                                  <span>Sorting your pile…</span>
-                                </>
-                              )}
-                            </div>
-                          ))}
-                          {inbox.length > 0 && (
-                            <button
-                              className="text-button"
-                              onClick={() => setReview(inbox[0].sourceId)}
-                            >
-                              A couple things need a human.
-                              <ArrowRight size={16} />
-                            </button>
-                          )}
-                        </div>
-                      )}
                       <div className="board-columns">
                         {(['Today', 'This week', 'Later'] as const).map((s, index) => (
-                          <section className="board-column" key={s}>
-                            <div className="column-heading">
-                              <span className={'column-symbol symbol-' + index}>
-                                {index === 0 ? (
-                                  <Sun size={17} />
-                                ) : index === 1 ? (
-                                  <CalendarDays size={17} />
-                                ) : (
-                                  <Lightbulb size={17} />
-                                )}
-                              </span>
-                              <h2>{s}</h2>
-                              <span className="column-count">
-                                {active.filter((i) => section(i, today, timezone) === s).length}
-                              </span>
-                              <button
-                                className="icon-button"
-                                aria-label={`Add item to ${s}`}
-                                onClick={() => setNewItem(true)}
-                              >
-                                <Plus size={17} />
-                              </button>
-                            </div>
-                            <div className="column-description">
-                              {index === 0
-                                ? 'Just the next few things.'
-                                : index === 1
-                                  ? 'A little look ahead.'
-                                  : 'Good things can wait.'}
-                            </div>
-                            {active
-                              .filter((i) => section(i, today, timezone) === s)
-                              .map((item) => renderCard(item))}
-                            {!active.some((i) => section(i, today, timezone) === s) && (
-                              <div className="empty-column">
-                                <span>↳</span>
-                                <p>
-                                  {showDone
-                                    ? 'Your finished things will land here.'
-                                    : 'Nothing is yelling at you here.'}
-                                </p>
+                          <Fragment key={s}>
+                            <section className={`board-column zone-${index}`}>
+                              <div className="column-heading">
+                                <span className={'column-symbol symbol-' + index}>
+                                  {index === 0 ? (
+                                    <Sun size={17} />
+                                  ) : index === 1 ? (
+                                    <CalendarDays size={17} />
+                                  ) : (
+                                    <Lightbulb size={17} />
+                                  )}
+                                </span>
+                                <h2>{s}</h2>
+                                <span className="column-count">
+                                  {active.filter((i) => section(i, today, timezone) === s).length}
+                                </span>
                                 <button
-                                  className="text-button"
-                                  onClick={() => {
-                                    captureInput.current?.focus();
-                                  }}
+                                  className="icon-button"
+                                  aria-label={`Add item to ${s}`}
+                                  onClick={() => setNewItem(true)}
                                 >
-                                  Add a little something
+                                  <Plus size={17} />
                                 </button>
                               </div>
-                            )}
-                            {s === 'Later' && (
-                              <div className="board-note">
-                                Not everything needs
-                                <br />
-                                to be a task.
-                                <span>Let an idea be an idea. ✧</span>
+                              <div className="column-description">
+                                {index === 0
+                                  ? 'Start here. The rest can wait.'
+                                  : index === 1
+                                    ? 'On the horizon.'
+                                    : 'Ideas worth keeping.'}
                               </div>
-                            )}
-                          </section>
+                              <div className="zone-cards">
+                                {active
+                                  .filter((i) => section(i, today, timezone) === s)
+                                  .map((item) => renderCard(item))}
+                              </div>
+                              {!active.some((i) => section(i, today, timezone) === s) && (
+                                <div className="empty-column">
+                                  <span>↳</span>
+                                  <p>
+                                    {showDone
+                                      ? 'Your finished things will land here.'
+                                      : 'Nothing is yelling at you here.'}
+                                  </p>
+                                  <button
+                                    className="text-button"
+                                    onClick={() => {
+                                      captureInput.current?.focus();
+                                    }}
+                                  >
+                                    Add a little something
+                                  </button>
+                                </div>
+                              )}
+                              {s === 'Later' && (
+                                <div className="board-note">
+                                  Not everything needs
+                                  <br />
+                                  to be a task.
+                                  <span>Keep a little room for possibility.</span>
+                                </div>
+                              )}
+                            </section>
+                            {index === 0 && inboxTray}
+                          </Fragment>
                         ))}
-                      </div>
-                      <div className="board-caption">
-                        <span>✧</span> Everything has a place. You don’t have to hold it all.
                       </div>
                     </div>
                     <aside className="right-rail">
                       <section className="mini-calendar">
                         <div className="rail-heading">
-                          <h3>Ahead of you</h3>
+                          <h3>
+                            This week{' '}
+                            <span className="calendar-month">
+                              {new Date().toLocaleDateString('en-US', { month: 'short' })}
+                            </span>
+                          </h3>
                           <Link href="/app/calendar" aria-label="Open calendar">
                             <ArrowUpRight size={18} />
                           </Link>
@@ -873,9 +854,7 @@ export default function Workspace({ view }: { view: string[] }) {
                       </section>
                       <section className="attention-panel">
                         <div className="rail-heading">
-                          <h3>
-                            <Sparkles size={17} />A little attention
-                          </h3>
+                          <h3>Needs a look</h3>
                           <span>{needsAttention.length}</span>
                         </div>
                         <p>A couple things need a human.</p>
@@ -908,7 +887,7 @@ export default function Workspace({ view }: { view: string[] }) {
                         )}
                       </section>
                       <section className="demo-kit">
-                        <span className="eyebrow">TRY A LITTLE MAGIC</span>
+                        <span className="eyebrow">FROM YOUR DEMO KIT</span>
                         <h3>From a file to a plan.</h3>
                         <p>Give Pile something messy.</p>
                         <button
@@ -954,9 +933,11 @@ export default function Workspace({ view }: { view: string[] }) {
                     </h2>
                     <span>Originals, always within reach.</span>
                   </div>
-                  {[...data.sources]
-                    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-                    .map(sourceRow)}
+                  <div className="source-grid">
+                    {[...data.sources]
+                      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+                      .map((s) => sourceRow(s))}
+                  </div>
                   {!data.sources.length && (
                     <div className="empty-page">
                       <Inbox size={35} />
@@ -1126,11 +1107,13 @@ export default function Workspace({ view }: { view: string[] }) {
                     <div className="panel-heading">
                       <h2>Captured context</h2>
                     </div>
-                    {data.sources
-                      .filter((s) =>
-                        data.items.some((i) => i.projectId === view[1] && i.sourceId === s.id),
-                      )
-                      .map(sourceRow)}
+                    <div className="source-grid">
+                      {data.sources
+                        .filter((s) =>
+                          data.items.some((i) => i.projectId === view[1] && i.sourceId === s.id),
+                        )
+                        .map((s) => sourceRow(s))}
+                    </div>
                   </section>
                 </>
               )}
@@ -1163,7 +1146,7 @@ export default function Workspace({ view }: { view: string[] }) {
                   </div>
                   {answer && (
                     <div className="memory-answer">
-                      <Sparkles size={20} />
+                      <FileText size={20} />
                       <p>{answer}</p>
                       <small>Backboard memory · may include older context</small>
                     </div>
@@ -1179,6 +1162,9 @@ export default function Workspace({ view }: { view: string[] }) {
                       <Search size={38} />
                       <h3>Couldn’t find that in your pile.</h3>
                       <p>Try a name, a project, or a few words you remember.</p>
+                      <button className="small-button" onClick={() => setQuery('')}>
+                        Clear search
+                      </button>
                     </div>
                   )}
                 </>
@@ -1212,7 +1198,7 @@ export default function Workspace({ view }: { view: string[] }) {
                     </div>
                     <div className="setting-row">
                       <span className="setting-icon">
-                        <Sparkles />
+                        <FileText />
                       </span>
                       <div>
                         <h3>Understanding your pile</h3>
@@ -1275,7 +1261,7 @@ export default function Workspace({ view }: { view: string[] }) {
           <span>
             pile<span>·</span>a little less on your mind.
           </span>
-          <span>Made for the beautifully busy.</span>
+          <span>Your thoughts. A little more room.</span>
         </footer>
       </div>
       {toast && (
@@ -1372,15 +1358,12 @@ export default function Workspace({ view }: { view: string[] }) {
         onClose={() => setSourcePreview(undefined)}
         title={sourcePreview?.fileName || 'The original thought'}
         description="Your source stays attached to every extracted item."
+        wide={sourcePreview?.type === 'pdf' || sourcePreview?.type === 'image'}
       >
         {sourcePreview && (
           <div className="source-detail">
             <span className="mode-pill">{sourcePreview.provider || sourcePreview.type}</span>
-            <p className="source-text">
-              {sourcePreview.transcription ||
-                sourcePreview.rawText ||
-                'An image you added to your pile.'}
-            </p>
+            <SourcePreview source={sourcePreview} />
             {sourcePreview.fileUrl && (
               <a
                 className="small-button"
@@ -1494,15 +1477,18 @@ export default function Workspace({ view }: { view: string[] }) {
         onClose={() => setOnboarding(false)}
         title={
           [
-            'Your life doesn’t arrive neatly organized.',
-            'Talk, type, upload, or drop anything in.',
-            'We’ll turn it into the things you actually need.',
+            'A desk for everything on your mind.',
+            'Start with the messy version.',
+            'A plan you have the final say in.',
           ][intro]
         }
         description="Meet your new place to put it all."
       >
         <div className="intro-content">
           <span className="intro-icon">
+            <span className="intro-paper-label">
+              {['a thought', 'a capture', 'a little clarity'][intro]}
+            </span>
             {intro === 0 ? (
               <Inbox size={48} />
             ) : intro === 1 ? (
@@ -1601,7 +1587,6 @@ function ItemEditor({
       )}
       {item.needsClarification && (
         <div className="question-box">
-          <Sparkles size={18} />
           {item.clarificationQuestion || 'Please confirm the details.'}
         </div>
       )}
@@ -1792,10 +1777,7 @@ function ReviewPanel({
         </div>
       )}
       <div className="review-summary">
-        <span>
-          <Sparkles size={17} />
-          {items.length} things found
-        </span>
+        <span>{items.length} things found</span>
         <span>{items.filter((i) => i.dueDate || i.startDateTime).length} dates</span>
         <span>{calendarName}</span>
       </div>
@@ -1868,6 +1850,7 @@ function VoiceCapture({
   const [seconds, setSeconds] = useState(0);
   const [transcript, setTranscript] = useState('');
   const [busy, setBusy] = useState(false);
+  const [activity, setActivity] = useState('');
   const [error, setError] = useState('');
   const recorder = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -1886,11 +1869,17 @@ function VoiceCapture({
     return () => clearInterval(t);
   }, [recording]);
   async function start() {
+    setActivity('Waiting for microphone access…');
     setError('');
+    setBusy(true);
     try {
       stream.current = await navigator.mediaDevices.getUserMedia({
         audio: true,
       });
+      if (unmounted.current) {
+        stream.current.getTracks().forEach((track) => track.stop());
+        return;
+      }
       const rec = new MediaRecorder(stream.current);
       recorder.current = rec;
       const chunks: BlobPart[] = [];
@@ -1905,6 +1894,7 @@ function VoiceCapture({
           );
           return;
         }
+        setActivity('Transcribing your recording…');
         setBusy(true);
         try {
           const form = new FormData();
@@ -1927,9 +1917,12 @@ function VoiceCapture({
       setRecording(true);
     } catch {
       setError('Microphone access is unavailable. You can type a transcript or use the sample.');
+    } finally {
+      if (!unmounted.current) setBusy(false);
     }
   }
   async function sample() {
+    setActivity('Loading the sample transcript…');
     setBusy(true);
     setError('');
     try {
@@ -1937,6 +1930,7 @@ function VoiceCapture({
       form.set('demo', 'true');
       const r = await api<{ text: string }>('transcribe', 'POST', form);
       setTranscript(r.text);
+      setSeconds(0);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load sample.');
     } finally {
@@ -1948,7 +1942,7 @@ function VoiceCapture({
       <span className="mode-pill">
         {real ? 'Voice transcription connected' : 'Demo voice · sample transcript available'}
       </span>
-      <div className={'waveform ' + (recording ? 'recording' : '')}>
+      <div aria-hidden="true" className={'waveform ' + (recording ? 'recording' : '')}>
         {Array.from({ length: 29 }, (_, n) => (
           <i
             key={n}
@@ -1964,16 +1958,18 @@ function VoiceCapture({
       </div>
       <button
         className={'record-button ' + (recording ? 'is-recording' : '')}
+        aria-label={recording ? 'Stop recording' : 'Start recording'}
         disabled={busy}
         onClick={() => (recording ? recorder.current?.stop() : start())}
       >
         {recording ? <Square size={21} /> : <Mic size={24} />}
       </button>
+      <strong className="record-label">{recording ? 'Stop recording' : 'Record a thought'}</strong>
       <p>
         {recording
-          ? 'Listening. Take your time.'
+          ? 'Recording · the bars are a status animation.'
           : busy
-            ? 'Turning sound into words…'
+            ? activity
             : 'Press to record. No perfect sentences needed.'}
       </p>
       {error && (
@@ -2003,7 +1999,7 @@ function VoiceCapture({
           onClick={() => onCapture(transcript)}
         >
           Sort my words
-          <Sparkles size={16} />
+          <ArrowRight size={16} />
         </button>
       </div>
     </div>

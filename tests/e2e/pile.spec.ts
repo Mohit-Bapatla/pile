@@ -38,7 +38,7 @@ test('event flyer approval creates one demo event and sync state', async ({ page
   await dialog.getByRole('button', { name: 'Add 1 to calendar' }).click();
   await expect(dialog).not.toBeVisible();
   await page.getByRole('link', { name: 'Calendar', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Make room for what matters.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The days ahead.' })).toBeVisible();
   const state = await (await page.request.get('/api/state')).json();
   const item = state.items.find((i: { title: string }) => i.title === 'HackRice Closing Ceremony');
   expect(item.calendarStatus).toBe('synced');
@@ -48,6 +48,8 @@ test('event flyer approval creates one demo event and sync state', async ({ page
   expect(next.events.filter((e: { itemId: string }) => e.itemId === item.id)).toHaveLength(1);
   await page.getByLabel('Jump to date').fill('2026-09-20');
   await expect(page.getByText('HackRice Closing Ceremony', { exact: true })).toBeVisible();
+  await page.goto('/app/inbox');
+  await expect(page.locator('.source-image .status')).toHaveText('Organized');
 });
 test('sample voice uses transcription endpoint and the normal pipeline', async ({ page }) => {
   await page.getByRole('button', { name: 'Talk it out' }).click();
@@ -145,7 +147,7 @@ test('desktop and mobile routes render without runtime errors or overflow', asyn
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.screenshot({
-    path: 'docs/screenshots/board.png',
+    path: 'test-results/board.png',
     fullPage: true,
     animations: 'disabled',
   });
@@ -169,7 +171,7 @@ test('desktop and mobile routes render without runtime errors or overflow', asyn
     true,
   );
   await page.screenshot({
-    path: 'docs/screenshots/mobile.png',
+    path: 'test-results/mobile.png',
     fullPage: true,
     animations: 'disabled',
   });

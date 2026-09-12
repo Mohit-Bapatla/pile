@@ -86,12 +86,16 @@ Use **Settings → Your demo kit** to download the three fixtures. `pnpm fixture
 
 ## Screenshots
 
-The board screenshot above and [mobile view](docs/screenshots/mobile.png) are captured from the running application with Playwright. The UI adapts to narrow screens and dialogs fit the viewport. Add more screenshots here as the product evolves.
+Captured from the running application with Playwright: [board](docs/screenshots/board.png), [voice capture](docs/screenshots/capture.png), [mixed-source inbox](docs/screenshots/inbox.png), [calendar](docs/screenshots/calendar.png), [mobile](docs/screenshots/mobile.png), [source preview](docs/screenshots/source-image.png), and [review](docs/screenshots/review.png). Desktop QA covers 1440×900, 1512×982 and 1280×800; mobile covers 390×844.
+
+The tactile redesign uses semantic paper colors, a slim navigation rail, readable source receipts, actual image previews and extracted-text PDF sheets. Today comes first; mobile orders Today, Inbox, This week and Later after capture. The recording waveform is a status animation, not measured audio. Sorting and completion honor reduced motion.
+
+Read [the design system](docs/DESIGN.md), [the before/after audit](docs/DESIGN_AUDIT.md), and [the engineering continuation handoff](docs/RELEASE_HANDOFF.md).
 
 ## Tech Stack
 
 - Next.js 16 App Router, React 19, strict TypeScript
-- CSS design tokens, locally bundled DM Sans / DM Serif Display, Lucide icons
+- CSS design tokens, locally bundled Instrument Sans Variable / Caveat, Lucide icons
 - Radix accessible dialog primitives, CSS transitions with reduced-motion support
 - Zod structured-output validation, chrono-node and date-fns-tz for dates
 - PGlite embedded PostgreSQL for local persistence; `pg` for hosted PostgreSQL
@@ -174,7 +178,7 @@ Install the browser once if needed:
 pnpm exec playwright install chromium
 ```
 
-Playwright starts or reuses the server on port 3001. Each test uses a separate browser workspace. Unit tests cover schema validation, dates/timezones, classification, board sections, project associations, confidence, source linking, and calendar IDs. Integration tests use a fresh PostgreSQL engine and run real file extraction, the source pipeline, persistence, search, deletion, and calendar approval. Browser tests exercise the primary user flows and check desktop/mobile rendering.
+Playwright starts or reuses the server on port 3001. Each test uses a separate browser workspace. Unit tests cover schema validation, dates/timezones, classification, board sections, project associations, confidence, source linking, and calendar IDs. Integration tests use a fresh PostgreSQL engine and run real file extraction, the source pipeline, persistence, search, deletion, and calendar approval. Browser tests exercise the primary user flows and check desktop/mobile rendering. The current suites contain **15 unit, 13 integration and 15 browser tests**. Four browser tests cover the redesign: viewport/accessibility regressions, source previews, keyboard/reduced-motion recording and sorting/failure states. Twelve additional settled dialog/state accessibility reports are saved in `docs/ACCESSIBILITY_RESULTS.json`.
 
 `.data/`, secrets, dependencies, build output, traces, and Playwright reports are ignored. Only synthetic fixture assets and curated screenshots are committed.
 

@@ -1,0 +1,50 @@
+[
+  {
+    "state": "onboarding",
+    "violations": []
+  },
+  {
+    "state": "item editor",
+    "violations": []
+  },
+  {
+    "state": "recording",
+    "violations": []
+  },
+  {
+    "state": "voice transcript",
+    "violations": []
+  },
+  {
+    "state": "voice review",
+    "violations": []
+  },
+  {
+    "state": "PDF review",
+    "violations": []
+  },
+  {
+    "state": "mixed-source inbox",
+    "violations": []
+  },
+  {
+    "state": "source image",
+    "violations": []
+  },
+  {
+    "state": "source PDF text",
+    "violations": []
+  },
+  {
+    "state": "empty search",
+    "violations": []
+  },
+  {
+    "state": "project detail",
+    "violations": []
+  },
+  {
+    "state": "file error",
+    "violations": []
+  }
+]
