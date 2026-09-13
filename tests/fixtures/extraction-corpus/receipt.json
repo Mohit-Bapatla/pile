@@ -1,0 +1,17 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "receipt",
+  "category": "receipt",
+  "text": "Order confirmation #125\nTotal: $56.23\nPurchased September 12, 2026\nDelivery estimate September 18\nThank you for shopping.",
+  "expected": [],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "stem-syllabus",
+  "category": "syllabus",
+  "text": "UGS 303 Ethics\nSyllabus \u00b7 Fall 2026\nInstructor: Jane Ellis\nTerm: August 24, 2026 to December 11, 2026\nLab report 1 due September 18\nQuiz 1 on September 21\nMidterm exam on October 15",
+  "expected": [
+    {
+      "title": "Lab report 1",
+      "type": "deadline",
+      "date": "2026-09-18"
+    },
+    {
+      "title": "Quiz 1",
+      "type": "event",
+      "date": "2026-09-21"
+    },
+    {
+      "title": "Midterm exam",
+      "type": "event",
+      "date": "2026-10-15"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

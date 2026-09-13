@@ -1,0 +1,24 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "flyer",
+  "category": "event flyer",
+  "text": "Design Night workshop September 18 at 6 PM in Rice Hall",
+  "expected": [
+    {
+      "title": "Design Night workshop",
+      "type": "event",
+      "date": "2026-09-18T23:00:00.000Z",
+      "location": "Rice Hall"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

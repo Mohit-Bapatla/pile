@@ -1,0 +1,974 @@
+{
+  "totals": {
+    "cases": 54,
+    "expectedItems": 81,
+    "matched": 81,
+    "falsePositives": 0,
+    "falseNegatives": 0,
+    "dateMismatches": 0,
+    "typeMismatches": 0,
+    "unwantedViolations": 0,
+    "detailMismatches": 0,
+    "falseDiscoveryRate": 0,
+    "segmentation": {
+      "cases": 28,
+      "exactCounts": 28,
+      "underCount": 0,
+      "overCount": 0,
+      "dateBindingErrors": 0,
+      "duplicateErrors": 0
+    }
+  },
+  "rows": [
+    {
+      "id": "application",
+      "category": "application instructions",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Submit application",
+          "type": "deadline",
+          "date": "2026-10-15",
+          "needsClarification": false
+        },
+        {
+          "title": "Upload resume",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "assignment",
+      "category": "assignment prompt",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Submit essay",
+          "type": "deadline",
+          "date": "2026-10-15",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "club",
+      "category": "club announcement",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Club meeting",
+          "type": "event",
+          "date": "2026-09-17T23:00:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "Email Maya to RSVP",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "conference",
+      "category": "conference agenda",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Opening ceremony",
+          "type": "event",
+          "date": "2026-10-15T14:00:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "Networking meeting",
+          "type": "event",
+          "date": "2026-10-15T19:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "doctor",
+      "category": "appointment instructions",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Dentist appointment",
+          "type": "event",
+          "date": "2026-09-15T20:00:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "Bring insurance card",
+          "type": "task",
+          "date": "2026-09-15",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "email",
+      "category": "pasted email",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Finish slides",
+          "type": "task",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "flyer",
+      "category": "event flyer",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Design Night workshop",
+          "type": "event",
+          "date": "2026-09-18T23:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "formats-syllabus",
+      "category": "syllabus",
+      "expected": 5,
+      "actual": 5,
+      "errors": [],
+      "items": [
+        {
+          "title": "Essay 1",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        },
+        {
+          "title": "Essay 2",
+          "type": "deadline",
+          "date": "2026-09-19",
+          "needsClarification": false
+        },
+        {
+          "title": "Essay 3",
+          "type": "deadline",
+          "date": "2026-09-20",
+          "needsClarification": false
+        },
+        {
+          "title": "Essay 4",
+          "type": "deadline",
+          "date": "2026-09-21",
+          "needsClarification": false
+        },
+        {
+          "title": "Essay 5",
+          "type": "deadline",
+          "date": "2026-09-22",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "grocery",
+      "category": "grocery list",
+      "expected": 3,
+      "actual": 3,
+      "errors": [],
+      "items": [
+        {
+          "title": "Buy milk",
+          "type": "task",
+          "needsClarification": false
+        },
+        {
+          "title": "Buy peanut butter and jelly",
+          "type": "task",
+          "needsClarification": false
+        },
+        {
+          "title": "Buy toothpaste",
+          "type": "task",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "humanities-syllabus",
+      "category": "syllabus",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Observation #1",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        },
+        {
+          "title": "Essay 2",
+          "type": "deadline",
+          "date": "2026-10-15",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "job",
+      "category": "job posting",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Application deadline",
+          "type": "deadline",
+          "date": "2026-10-15",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "lecture",
+      "category": "class lecture notes",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "meeting-notes",
+      "category": "meeting notes",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        },
+        {
+          "title": "Submit project proposal",
+          "type": "task",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "no-dates-syllabus",
+      "category": "syllabus",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "optional-syllabus",
+      "category": "syllabus",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "UGS 303 Office hours",
+          "type": "event",
+          "date": "2026-08-25T19:00:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "UGS 303 Tutoring",
+          "type": "event",
+          "date": "2026-08-26T23:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "percent-syllabus",
+      "category": "syllabus",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "policy-syllabus",
+      "category": "syllabus",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "project-plan",
+      "category": "project planning",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Finish prototype",
+          "type": "task",
+          "date": "2026-09-17",
+          "needsClarification": false
+        },
+        {
+          "title": "Review launch report",
+          "type": "task",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "prose-syllabus",
+      "category": "syllabus",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Submit final essay",
+          "type": "deadline",
+          "date": "2026-10-15",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "random-note",
+      "category": "personal note",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "receipt",
+      "category": "receipt",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "recurring-syllabus",
+      "category": "syllabus",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "UGS 303 Lecture",
+          "type": "event",
+          "date": "2026-08-25T14:30:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "UGS 303 Discussion",
+          "type": "event",
+          "date": "2026-08-28T16:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "simple-syllabus",
+      "category": "syllabus",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Observation #2",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        },
+        {
+          "title": "Midterm exam",
+          "type": "event",
+          "date": "2026-10-15",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "stem-syllabus",
+      "category": "syllabus",
+      "expected": 3,
+      "actual": 3,
+      "errors": [],
+      "items": [
+        {
+          "title": "Lab report 1",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        },
+        {
+          "title": "Quiz 1",
+          "type": "event",
+          "date": "2026-09-21",
+          "needsClarification": false
+        },
+        {
+          "title": "Midterm exam",
+          "type": "event",
+          "date": "2026-10-15",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "table-syllabus",
+      "category": "syllabus",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Essay 1",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        },
+        {
+          "title": "Project proposal",
+          "type": "deadline",
+          "date": "2026-09-25",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "text-bullets",
+      "category": "text",
+      "expected": 3,
+      "actual": 3,
+      "errors": [],
+      "items": [
+        {
+          "title": "Finish slides",
+          "type": "task",
+          "date": "2026-09-13T00:00:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "Email professor",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        },
+        {
+          "title": "Club meeting",
+          "type": "event",
+          "date": "2026-09-17T23:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "text-contradictory",
+      "category": "text",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Submit essay",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": true
+        }
+      ]
+    },
+    {
+      "id": "text-emoji",
+      "category": "text",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "text-empty",
+      "category": "text",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "text-month-name",
+      "category": "text",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Juniper about the demo",
+          "type": "task",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "text-shorthand",
+      "category": "text",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Calculus homework",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "text-typo",
+      "category": "text",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "text-undated",
+      "category": "text",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Finish slides",
+          "type": "task",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "text-unicode",
+      "category": "text",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email José",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "travel",
+      "category": "travel itinerary",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Flight to Boston",
+          "type": "event",
+          "date": "2026-10-15T14:00:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "Pack passport",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-ambiguous",
+      "category": "voice",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Finish report",
+          "type": "task",
+          "needsClarification": true
+        }
+      ]
+    },
+    {
+      "id": "voice-cancel",
+      "category": "voice",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "voice-correction",
+      "category": "voice",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Dentist appointment",
+          "type": "event",
+          "date": "2026-09-16T20:00:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "Submit project",
+          "type": "task",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-disfluent",
+      "category": "voice",
+      "expected": 3,
+      "actual": 3,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        },
+        {
+          "title": "Calculus homework",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        },
+        {
+          "title": "Dentist appointment",
+          "type": "event",
+          "date": "2026-09-15T20:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-duplicate",
+      "category": "voice",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        },
+        {
+          "title": "Homework",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-four-actions",
+      "category": "voice",
+      "expected": 4,
+      "actual": 4,
+      "errors": [],
+      "items": [
+        {
+          "title": "Call mom",
+          "type": "reminder",
+          "needsClarification": false
+        },
+        {
+          "title": "Buy toothpaste",
+          "type": "task",
+          "needsClarification": false
+        },
+        {
+          "title": "Upload resume",
+          "type": "task",
+          "needsClarification": false
+        },
+        {
+          "title": "Meeting with Sarah",
+          "type": "event",
+          "date": "2026-09-17T19:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-idea-task",
+      "category": "voice",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "A quieter browser",
+          "type": "idea",
+          "needsClarification": false
+        },
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-merged-p0",
+      "category": "voice",
+      "expected": 3,
+      "actual": 3,
+      "errors": [],
+      "items": [
+        {
+          "title": "Probability test",
+          "type": "event",
+          "needsClarification": true
+        },
+        {
+          "title": "Linear algebra midterm",
+          "type": "event",
+          "date": "2026-09-16",
+          "needsClarification": false
+        },
+        {
+          "title": "Calculus homework",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-next-friday",
+      "category": "voice",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Submit HackRice Devpost",
+          "type": "reminder",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-none",
+      "category": "voice",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "voice-recurring",
+      "category": "voice",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Yoga",
+          "type": "event",
+          "date": "2026-09-15T23:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-shared-chapters",
+      "category": "voice",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Study chapters 4 and 5",
+          "type": "task",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-shared-groceries",
+      "category": "voice",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Buy peanut butter and jelly",
+          "type": "task",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-shared-names",
+      "category": "voice",
+      "expected": 1,
+      "actual": 1,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Maya and Jordan",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-stt-clock",
+      "category": "voice",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Dentist appointment",
+          "type": "event",
+          "date": "2026-09-15T20:00:00.000Z",
+          "needsClarification": false
+        },
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-thinking",
+      "category": "voice",
+      "expected": 0,
+      "actual": 0,
+      "errors": [],
+      "items": []
+    },
+    {
+      "id": "voice-three-actions",
+      "category": "voice",
+      "expected": 3,
+      "actual": 3,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        },
+        {
+          "title": "Probability homework",
+          "type": "deadline",
+          "date": "2026-09-13",
+          "needsClarification": false
+        },
+        {
+          "title": "Dentist appointment",
+          "type": "event",
+          "date": "2026-09-15T20:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-two-academic",
+      "category": "voice",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Linear algebra midterm",
+          "type": "event",
+          "date": "2026-09-16",
+          "needsClarification": false
+        },
+        {
+          "title": "Calculus homework",
+          "type": "deadline",
+          "date": "2026-09-18",
+          "needsClarification": false
+        }
+      ]
+    },
+    {
+      "id": "voice-two-dates",
+      "category": "voice",
+      "expected": 2,
+      "actual": 2,
+      "errors": [],
+      "items": [
+        {
+          "title": "Email Maya",
+          "type": "task",
+          "date": "2026-09-13",
+          "needsClarification": false
+        },
+        {
+          "title": "Finish slides",
+          "type": "task",
+          "date": "2026-09-13T00:00:00.000Z",
+          "needsClarification": false
+        }
+      ]
+    }
+  ]
+}

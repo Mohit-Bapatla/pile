@@ -1,0 +1,17 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "percent-syllabus",
+  "category": "syllabus",
+  "text": "UGS 303 Ethics\nSyllabus \u00b7 Fall 2026\nInstructor: Jane Ellis\nTerm: August 24, 2026 to December 11, 2026\nAssignment | Due date\nCanvas quizzes \u2014 5%\nParticipation \u2014 10%\nHomework \u2014 20%\nBy via Canvas 1% | September 18\nBy via Canvas 5% | September 25\nThe final grade is based on Canvas quizzes worth 5%.",
+  "expected": [],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

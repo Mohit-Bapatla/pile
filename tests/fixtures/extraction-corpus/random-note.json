@@ -1,0 +1,17 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "random-note",
+  "category": "personal note",
+  "text": "The clouds looked like mountains. I was thinking about probability today and linear algebra is kind of interesting.",
+  "expected": [],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

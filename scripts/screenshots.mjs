@@ -35,7 +35,7 @@ async function audit(name) {
     })),
   });
 }
-await page.goto('http://127.0.0.1:3001/app');
+await page.goto('http://127.0.0.1:3003/app');
 await page.getByRole('heading', { name: 'Your board', exact: true }).waitFor();
 await shot('board');
 await shot('board-full', true);
@@ -87,7 +87,7 @@ await page.getByRole('button', { name: 'Add 1 to calendar' }).waitFor();
 await page.getByRole('button', { name: 'Add 1 to calendar' }).click();
 await page.getByRole('button', { name: 'Confirm add 1' }).click();
 await page.getByRole('dialog').waitFor({ state: 'hidden' });
-await page.goto('http://127.0.0.1:3001/app/inbox');
+await page.goto('http://127.0.0.1:3003/app/inbox');
 await shot('inbox');
 await audit('mixed-source inbox');
 await page.getByRole('button', { name: /sample-event.png image/ }).click();
@@ -98,14 +98,14 @@ await page.getByRole('button', { name: /sample-syllabus.pdf pdf/ }).click();
 await shot('source-pdf');
 await audit('source PDF preview');
 await page.getByRole('button', { name: 'Close dialog' }).click();
-await page.goto('http://127.0.0.1:3001/app/calendar');
+await page.goto('http://127.0.0.1:3003/app/calendar');
 await page.getByLabel('Jump to date').fill('2026-09-17');
 await page.getByLabel('Jump to date').blur();
 await shot('calendar');
 await page.setViewportSize({ width: 390, height: 844 });
 await shot('calendar-mobile');
 await page.setViewportSize({ width: 1440, height: 900 });
-await page.goto('http://127.0.0.1:3001/app/search');
+await page.goto('http://127.0.0.1:3003/app/search');
 await page.getByLabel('Search your pile').fill('Maya');
 await page.getByRole('heading', { name: /Email Maya/ }).waitFor();
 await page.getByLabel('Search your pile').blur();
@@ -114,14 +114,14 @@ await page.getByLabel('Search your pile').fill('zzmissingneedle');
 await page.getByText('0 items · 0 sources', { exact: true }).waitFor();
 await shot('empty');
 await audit('empty search');
-await page.goto('http://127.0.0.1:3001/app/projects');
+await page.goto('http://127.0.0.1:3003/app/projects');
 await shot('projects');
 await page.locator('.project-card').first().click();
 await shot('project-detail');
 await audit('project detail');
-await page.goto('http://127.0.0.1:3001/app/settings');
+await page.goto('http://127.0.0.1:3003/app/settings');
 await shot('settings');
-await page.goto('http://127.0.0.1:3001/app');
+await page.goto('http://127.0.0.1:3003/app');
 await page
   .getByLabel('Upload file')
   .setInputFiles({ name: 'unsupported.csv', mimeType: 'text/csv', buffer: Buffer.from('x,y') });
@@ -142,7 +142,7 @@ await emptyPage.route('**/api/state', async (route) => {
     json: { ...json, items: [], sources: [], projects: [], events: [] },
   });
 });
-await emptyPage.goto('http://127.0.0.1:3001/app');
+await emptyPage.goto('http://127.0.0.1:3003/app');
 await emptyPage.getByText('Nothing is yelling at you here.').first().waitFor();
 await emptyPage.screenshot({ path: path.join(out, 'empty-board-mobile.png'), fullPage: true });
 await emptyContext.close();

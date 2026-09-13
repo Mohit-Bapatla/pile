@@ -17,7 +17,10 @@
     "fixtures": "tsx scripts/fixtures.ts",
     "format": "prettier --write .",
     "secret:scan": "node scripts/secret-scan.mjs",
-    "screenshots": "node scripts/screenshots.mjs"
+    "screenshots": "node scripts/screenshots.mjs",
+    "qa:server": "node scripts/qa-server.mjs --manual",
+    "eval:extraction": "tsx scripts/eval-extraction.ts",
+    "demo:reset": "tsx scripts/demo-reset.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "latest",

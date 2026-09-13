@@ -1,0 +1,17 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-cancel",
+  "category": "voice",
+  "text": "Cancel the dentist appointment Tuesday. It is not happening.",
+  "expected": [],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

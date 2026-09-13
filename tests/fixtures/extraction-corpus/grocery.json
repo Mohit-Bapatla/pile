@@ -1,0 +1,30 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "grocery",
+  "category": "grocery list",
+  "text": "Buy milk\nBuy peanut butter and jelly\nBuy toothpaste",
+  "expected": [
+    {
+      "title": "Buy milk",
+      "type": "task"
+    },
+    {
+      "title": "Buy peanut butter and jelly",
+      "type": "task"
+    },
+    {
+      "title": "Buy toothpaste",
+      "type": "task"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

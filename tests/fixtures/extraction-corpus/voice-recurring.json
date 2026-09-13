@@ -1,0 +1,19 @@
+{
+  "id": "voice-recurring",
+  "category": "voice",
+  "text": "Attend yoga every Tuesday at 6 PM until December 10, 2026.",
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "expected": [
+    {
+      "title": "Yoga",
+      "type": "event",
+      "date": "2026-09-15T23:00:00.000Z",
+      "recurrence": [
+        "TU"
+      ]
+    }
+  ],
+  "optional": [],
+  "forbidden": []
+}

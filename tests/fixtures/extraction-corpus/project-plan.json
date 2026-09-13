@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "project-plan",
+  "category": "project planning",
+  "text": "Project planning\nFinish the prototype Thursday\nReview the launch report Friday\nWe discussed our long-term hopes.",
+  "expected": [
+    {
+      "title": "Finish prototype",
+      "type": "task",
+      "date": "2026-09-17"
+    },
+    {
+      "title": "Review launch report",
+      "type": "task",
+      "date": "2026-09-18"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

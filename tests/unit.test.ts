@@ -331,7 +331,7 @@ describe('prejudge adversarial capture and calendars', () => {
   it.each([
     ['email maya tomorrow', 'task', 'Email maya'],
     ['emial maya tomorow', 'task', 'Email maya'],
-    ['📧 email maya tomorrow!!!', 'task', '📧 email maya !!!'],
+    ['📧 email maya tomorrow!!!', 'task', 'Email maya'],
   ])('handles short capture %s', async (text, type, title) => {
     const r = await parser.parseText(text, context);
     expect(r.items).toHaveLength(1);
@@ -340,7 +340,7 @@ describe('prejudge adversarial capture and calendars', () => {
   it('extracts a location and keeps a clean appointment title', async () => {
     const r = await parser.parseText('dentist tuesday 3pm at west campus dental', context);
     expect(r.items[0]).toMatchObject({
-      title: 'Dentist',
+      title: 'Dentist appointment',
       location: 'west campus dental',
       startDateTime: '2026-09-15T20:00:00.000Z',
     });
@@ -464,4 +464,36 @@ it('all-day recurring occurrences retain date-only values across display zones',
   expect(result[0]).toMatchObject({ start: '2026-09-14', end: '2026-09-15' });
   for (const zone of ['Asia/Tokyo', 'America/Los_Angeles'])
     expect(itemDay(result[0].start, zone)).toBe('2026-09-14');
+});
+
+describe('final correctness properties', () => {
+  it('never schedules policy fragments or arbitrary numeric grading cells', async () => {
+    const parser = new MockAIProvider();
+    for (let n = 1; n <= 25; n++) {
+      const result = await parser.parseText(
+        `UGS 303 Ethics\nSyllabus\nInstructor: Jane\nAssignment | Due date\nBy via Canvas ${n}% | September 18\nRequests must be submitted ${n} weeks in advance.\nLate work may receive reduced credit.`,
+        context,
+      );
+      expect(result.items).toEqual([]);
+    }
+  });
+  it('keeps punctuation, Unicode, empty input and large unstructured sources valid and bounded', async () => {
+    const parser = new MockAIProvider();
+    for (const text of [
+      '',
+      '🧠'.repeat(500),
+      ';;;!!!???',
+      'Title '.repeat(10000),
+      'Email José tomorrow!!!',
+      'Submit essay February 30',
+    ]) {
+      const result = await parser.parseText(text, context);
+      expect(extractionSchema.safeParse(result).success).toBe(true);
+      expect(result.items.every((i) => i.title.length <= 80)).toBe(true);
+      if (text.includes('February 30'))
+        expect(
+          result.items.every((i) => !i.startDateTime && !i.dueDate && i.needsClarification),
+        ).toBe(true);
+    }
+  });
 });

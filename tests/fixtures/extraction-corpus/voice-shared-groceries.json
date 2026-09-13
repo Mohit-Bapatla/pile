@@ -1,0 +1,22 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-shared-groceries",
+  "category": "voice",
+  "text": "Buy peanut butter and jelly.",
+  "expected": [
+    {
+      "title": "Buy peanut butter and jelly",
+      "type": "task"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

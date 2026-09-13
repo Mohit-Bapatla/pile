@@ -183,6 +183,7 @@ export default function Workspace({ view }: { view: string[] }) {
   const [arriving, setArriving] = useState<string[]>([]);
   const [completing, setCompleting] = useState<string[]>([]);
   const [detail, setDetail] = useState<Item>();
+  const [calendarDetail, setCalendarDetail] = useState<CalendarEvent>();
   const [review, setReview] = useState<string>();
   const [voice, setVoice] = useState(false);
   const [onboarding, setOnboarding] = useState(false);
@@ -340,6 +341,7 @@ export default function Workspace({ view }: { view: string[] }) {
             : 'Original saved. No new actions to manage.'),
       );
       if (
+        result.items.length > 1 ||
         source.type === 'pdf' ||
         source.type === 'image' ||
         result.items.some((i) => i.needsClarification)
@@ -360,6 +362,7 @@ export default function Workspace({ view }: { view: string[] }) {
     ) || [];
   const needsAttention = active.filter(
     (i) =>
+      !['done', 'archived'].includes(i.status) &&
       i.tier !== 'optional' &&
       (i.needsClarification ||
         i.status === 'inbox' ||
@@ -392,6 +395,37 @@ export default function Workspace({ view }: { view: string[] }) {
   const pending =
     data?.sources.filter((s) => ['queued', 'processing', 'error'].includes(s.processingStatus)) ||
     [];
+  const completingRequests = useRef(new Set<string>());
+  async function toggleCompleted(item: Item) {
+    if (completingRequests.current.has(item.id)) return;
+    completingRequests.current.add(item.id);
+    setCompleting((ids) => [...ids, item.id]);
+    try {
+      await api('items/' + item.id, 'PATCH', {
+        status: item.status === 'done' ? 'planned' : 'done',
+      });
+      await refresh();
+      setToast(item.status === 'done' ? 'Back on the board.' : 'One less thing.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not update item.');
+    } finally {
+      completingRequests.current.delete(item.id);
+      setCompleting((ids) => ids.filter((id) => id !== item.id));
+    }
+  }
+  function calendarCompletion(item?: Item) {
+    return item && ['task', 'deadline', 'reminder'].includes(item.type) ? (
+      <button
+        className="calendar-complete"
+        aria-label={`${item.status === 'done' ? 'Reopen' : 'Complete'} ${item.title}`}
+        aria-pressed={item.status === 'done'}
+        disabled={completing.includes(item.id)}
+        onClick={() => toggleCompleted(item)}
+      >
+        <Check size={15} />
+      </button>
+    ) : null;
+  }
   function renderCard(item: Item) {
     const source = data?.sources.find((s) => s.id === item.sourceId);
     return (
@@ -408,22 +442,7 @@ export default function Workspace({ view }: { view: string[] }) {
         completing={completing.includes(item.id)}
         onEdit={() => setDetail(item)}
         onSource={() => setSourcePreview(source)}
-        onComplete={async () => {
-          try {
-            await api('items/' + item.id, 'PATCH', {
-              status: item.status === 'done' ? 'planned' : 'done',
-            });
-            setCompleting((ids) => [...ids, item.id]);
-            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-              await new Promise((r) => setTimeout(r, 200));
-            await refresh();
-            setToast(item.status === 'done' ? 'Back on the board.' : 'One less thing.');
-          } catch (e) {
-            setError(e instanceof Error ? e.message : 'Could not update item.');
-          } finally {
-            setCompleting((ids) => ids.filter((id) => id !== item.id));
-          }
-        }}
+        onComplete={() => toggleCompleted(item)}
       />
     );
   }
@@ -901,7 +920,7 @@ export default function Workspace({ view }: { view: string[] }) {
                           <h3>Needs a look</h3>
                           <span>{needsAttention.length}</span>
                         </div>
-                        <p>A couple things need a human.</p>
+                        {needsAttention.length > 0 && <p>A couple things need a human.</p>}
                         {needsAttention.slice(0, 2).map((item) => (
                           <div className="attention-item" key={item.id}>
                             <span className="eyebrow">
@@ -1062,24 +1081,49 @@ export default function Workspace({ view }: { view: string[] }) {
                           </header>
                           {events
                             .filter((e) => itemDay(e.start, timezone) === iso)
-                            .map((e) => (
-                              <div className="calendar-event" key={e.id}>
-                                <CheckCheck size={14} />
-                                <strong>{e.title}</strong>
-                                <span>
-                                  {e.allDay
-                                    ? 'All day'
-                                    : dateLabel(e.start, timezone).split(', ').slice(1).join(', ')}
-                                </span>
-                                {e.location && <small>{e.location}</small>}
-                                {data.config.googleConnected && (
-                                  <small>{e.demo ? 'Demo calendar' : 'Google Calendar'}</small>
-                                )}
-                              </div>
-                            ))}
-                          {active
+                            .map((e) => {
+                              const linked = data.items.find((i) => i.id === e.itemId);
+                              return (
+                                <div
+                                  className={
+                                    'calendar-event ' +
+                                    (linked?.status === 'done' ? 'is-complete' : '')
+                                  }
+                                  key={e.id}
+                                >
+                                  {calendarCompletion(linked)}
+                                  {linked ? (
+                                    <button
+                                      className="calendar-open"
+                                      onClick={() => setDetail(linked)}
+                                    >
+                                      <strong>{linked.title}</strong>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className="calendar-open"
+                                      onClick={() => setCalendarDetail(e)}
+                                      aria-label={'Open ' + e.title}
+                                    >
+                                      <strong>{e.title}</strong>
+                                    </button>
+                                  )}
+                                  <span>
+                                    {e.allDay
+                                      ? 'All day'
+                                      : dateLabel(e.start, timezone)
+                                          .split(', ')
+                                          .slice(1)
+                                          .join(', ')}
+                                  </span>
+                                  {e.location && <small>{e.location}</small>}
+                                </div>
+                              );
+                            })}
+                          {data.items
                             .filter(
                               (i) =>
+                                i.status !== 'archived' &&
                                 i.tier !== 'optional' &&
                                 i.calendarStatus !== 'synced' &&
                                 (i.startDateTime || i.dueDate
@@ -1087,15 +1131,33 @@ export default function Workspace({ view }: { view: string[] }) {
                                   : undefined) === iso,
                             )
                             .map((i) => (
-                              <button
-                                className="calendar-event unsynced"
+                              <div
+                                className={
+                                  'calendar-event unsynced ' +
+                                  (i.status === 'done' ? 'is-complete' : '')
+                                }
                                 key={i.id}
-                                onClick={() => setDetail(i)}
                               >
-                                <Icon name={i.type} />
-                                <strong>{i.title}</strong>
-                                <small>On your board · not synced</small>
-                              </button>
+                                {calendarCompletion(i)}
+                                <button
+                                  className="calendar-open"
+                                  onClick={() => setDetail(i)}
+                                  aria-label={'Open ' + i.title}
+                                >
+                                  <strong>{i.title}</strong>
+                                </button>
+                                {(i.startDateTime || i.dueDate)?.includes('T') && (
+                                  <span>
+                                    {formatInTimeZone(
+                                      (i.startDateTime || i.dueDate)!,
+                                      timezone,
+                                      'h:mm a',
+                                    )}
+                                  </span>
+                                )}
+                                {i.location && <small>{i.location}</small>}
+                                {i.needsClarification && <small>Date needs review</small>}
+                              </div>
                             ))}
                         </div>
                       );
@@ -1368,6 +1430,27 @@ export default function Workspace({ view }: { view: string[] }) {
               setToast('Tucked away.');
             }}
           />
+        )}
+      </Modal>
+      <Modal
+        open={!!calendarDetail}
+        onClose={() => setCalendarDetail(undefined)}
+        title={calendarDetail?.title || 'Calendar event'}
+        description="A scheduled event on your calendar."
+      >
+        {calendarDetail && (
+          <div className="calendar-event-detail">
+            <p>
+              {dateLabel(calendarDetail.start, timezone)}
+              {calendarDetail.allDay ? ' · All day' : ''}
+            </p>
+            {calendarDetail.location && <p>{calendarDetail.location}</p>}
+            <p>
+              {calendarDetail.demo
+                ? 'Demo calendar example.'
+                : 'Manage this external event in Google Calendar.'}
+            </p>
+          </div>
         )}
       </Modal>
       <Modal
@@ -2185,6 +2268,16 @@ function VoiceCapture({
   const [busy, setBusy] = useState(false);
   const [activity, setActivity] = useState('');
   const [error, setError] = useState('');
+  const [configured, setConfigured] = useState(real);
+  const [audioUrl, setAudioUrl] = useState('');
+  const [level, setLevel] = useState(0);
+  const [heardSound, setHeardSound] = useState(false);
+  const [meterAvailable, setMeterAvailable] = useState(false);
+  const audioFile = useRef<File | null>(null);
+  const previewUrl = useRef('');
+  const audioContext = useRef<AudioContext | null>(null);
+  const meterTimer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const upload = useRef<AbortController | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const startedAt = useRef(0);
   const recordedDuration = useRef<number | undefined>(undefined);
@@ -2194,10 +2287,64 @@ function VoiceCapture({
     unmounted.current = false;
     return () => {
       unmounted.current = true;
+      clearInterval(meterTimer.current);
+      void audioContext.current?.close().catch(() => {});
+      upload.current?.abort();
+      if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
       if (recorder.current?.state === 'recording') recorder.current.stop();
       stream.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
+  useEffect(() => {
+    // Re-check when the dialog opens; a tab can outlive server configuration changes.
+    const controller = new AbortController();
+    void fetch('/api/state', { cache: 'no-store', signal: controller.signal })
+      .then((response) => response.json())
+      .then((state) => {
+        if (!controller.signal.aborted && typeof state.config?.voice === 'boolean')
+          setConfigured(state.config.voice);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
+  async function transcribe(file: File) {
+    setActivity('Transcribing your recording…');
+    setBusy(true);
+    setError('');
+    const controller = new AbortController();
+    upload.current = controller;
+    const timeout = setTimeout(() => controller.abort(), 55000);
+    try {
+      const form = new FormData();
+      form.set('audio', file);
+      // The server is authoritative; do not discard audio because of a stale config prop.
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: form,
+        signal: controller.signal,
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Transcription failed. Please retry.');
+      if (!result.text?.trim())
+        throw new Error('No speech was detected. Listen to the recording and try again.');
+      if (!unmounted.current) {
+        setTranscript(result.text);
+        setConfigured(true);
+      }
+    } catch (error) {
+      if (!unmounted.current)
+        setError(
+          controller.signal.aborted
+            ? 'Transcription timed out. Your recording is still available below; try again.'
+            : error instanceof Error
+              ? error.message
+              : 'Transcription failed. Please retry.',
+        );
+    } finally {
+      clearTimeout(timeout);
+      if (!unmounted.current) setBusy(false);
+    }
+  }
   useEffect(() => {
     if (!recording) return;
     const t = setInterval(
@@ -2210,6 +2357,9 @@ function VoiceCapture({
     setActivity('Waiting for microphone access…');
     setError('');
     setBusy(true);
+    setHeardSound(false);
+    setLevel(0);
+    setMeterAvailable(false);
     try {
       let acceptingStream = true;
       let permissionTimer: ReturnType<typeof setTimeout> | undefined;
@@ -2248,41 +2398,45 @@ function VoiceCapture({
       );
       const rec = new MediaRecorder(stream.current, mime ? { mimeType: mime } : undefined);
       recorder.current = rec;
-      const chunks: BlobPart[] = [];
-      rec.ondataavailable = (e) => chunks.push(e.data);
+      const chunks: Blob[] = [];
+      rec.ondataavailable = (e) => {
+        if (e.data.size) chunks.push(e.data);
+      };
       rec.onstop = async () => {
-        recordedDuration.current = Math.max(0.001, (performance.now() - startedAt.current) / 1000);
-        setSeconds(Math.floor(recordedDuration.current));
+        clearInterval(meterTimer.current);
+        void audioContext.current?.close().catch(() => {});
+        audioContext.current = null;
         stream.current?.getTracks().forEach((t) => t.stop());
         if (unmounted.current) return;
+        recordedDuration.current = Math.max(0.001, (performance.now() - startedAt.current) / 1000);
+        setSeconds(Math.floor(recordedDuration.current));
         setRecording(false);
-        if (!real) {
+        setLevel(0);
+        const type =
+          rec.mimeType || chunks.find((chunk) => chunk.type)?.type || mime || 'audio/webm';
+        const file = new File(chunks, 'voice.' + (type.includes('mp4') ? 'm4a' : 'webm'), { type });
+        if (!file.size) {
           setError(
-            'Recording finished. Transcription isn’t configured here; type what you said or use the sample transcript.',
+            'The microphone returned an empty recording. Check your input device or try Pile in Chrome or Safari.',
           );
+          setBusy(false);
           return;
         }
-        setActivity('Transcribing...');
-        setBusy(true);
-        try {
-          const form = new FormData();
-          form.set(
-            'audio',
-            new File(chunks, 'voice.' + (rec.mimeType.includes('mp4') ? 'm4a' : 'webm'), {
-              type: rec.mimeType,
-            }),
-          );
-          const r = await api<{ text: string }>('transcribe', 'POST', form);
-          setTranscript(r.text);
-        } catch (e) {
-          setError(e instanceof Error ? e.message : 'Transcription failed.');
-        } finally {
-          setBusy(false);
-        }
+        audioFile.current = file;
+        if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+        previewUrl.current = URL.createObjectURL(file);
+        setAudioUrl(previewUrl.current);
+        await transcribe(file);
       };
       setSeconds(0);
       setTranscript('');
+      if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+      previewUrl.current = '';
+      setAudioUrl('');
+      audioFile.current = null;
       rec.onerror = () => {
+        clearInterval(meterTimer.current);
+        void audioContext.current?.close().catch(() => {});
         stream.current?.getTracks().forEach((t) => t.stop());
         setRecording(false);
         setError('Recording stopped unexpectedly. Please try again.');
@@ -2291,6 +2445,28 @@ function VoiceCapture({
       recordedDuration.current = undefined;
       rec.start(1000);
       setRecording(true);
+      // The meter reads real input; it is not a decorative recording animation.
+      try {
+        const context = new AudioContext();
+        audioContext.current = context;
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 1024;
+        context.createMediaStreamSource(stream.current).connect(analyser);
+        void context.resume().catch(() => {});
+        const samples = new Uint8Array(analyser.fftSize);
+        meterTimer.current = setInterval(() => {
+          if (context.state !== 'running') return;
+          setMeterAvailable(true);
+          analyser.getByteTimeDomainData(samples);
+          const rms = Math.sqrt(
+            samples.reduce((sum, value) => sum + ((value - 128) / 128) ** 2, 0) / samples.length,
+          );
+          setLevel(Math.min(100, Math.round(rms * 500)));
+          if (rms > 0.008) setHeardSound(true);
+        }, 100);
+      } catch {
+        // Recording and playback still work when Web Audio monitoring is unavailable.
+      }
     } catch (e) {
       stream.current?.getTracks().forEach((track) => track.stop());
       setError(
@@ -2322,21 +2498,35 @@ function VoiceCapture({
   return (
     <div className="voice-panel">
       <span className="mode-pill">
-        {real
+        {configured
           ? 'ElevenLabs · speech-to-text configured'
           : 'Demo voice · sample transcript available'}
       </span>
-      <div aria-hidden="true" className={'waveform ' + (recording ? 'recording' : '')}>
+      <div aria-hidden="true" className="waveform input-waveform">
         {Array.from({ length: 29 }, (_, n) => (
           <i
             key={n}
             style={{
-              height: 12 + ((n * 17) % 45),
-              animationDelay: n * 0.04 + 's',
+              height: recording ? 4 + (level / 100) * (12 + ((n * 17) % 45)) : 4,
             }}
           />
         ))}
       </div>
+      {recording && (
+        <div
+          role="meter"
+          aria-label="Microphone input level"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={level}
+        >
+          {meterAvailable
+            ? level > 4
+              ? 'Microphone is picking up sound'
+              : 'No sound right now — speak toward your microphone'
+            : 'Input meter unavailable — listen to playback after stopping'}
+        </div>
+      )}
       <div className="recording-time">
         {String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}
       </div>
@@ -2344,23 +2534,50 @@ function VoiceCapture({
         className={'record-button ' + (recording ? 'is-recording' : '')}
         aria-label={recording ? 'Stop recording' : 'Start recording'}
         disabled={busy}
-        onClick={() => (recording ? recorder.current?.stop() : start())}
+        onClick={() => {
+          if (recording) {
+            setBusy(true);
+            setActivity('Finishing recording…');
+            recorder.current?.stop();
+          } else void start();
+        }}
       >
         {recording ? <Square size={21} /> : <Mic size={24} />}
       </button>
       <strong className="record-label">{recording ? 'Stop recording' : 'Record a thought'}</strong>
       <p>
         {recording
-          ? 'Recording · the bars are a status animation.'
+          ? 'Recording. Stop when you’re done to get your transcript.'
           : busy
             ? activity
-            : real
-              ? 'Press to record. No perfect sentences needed.'
+            : configured
+              ? 'Press to record. Your transcript appears after you stop.'
               : 'Transcription is not configured here. Type below or use the labeled sample.'}
       </p>
       {error && (
         <div role="alert" className="error-banner">
           {error}
+        </div>
+      )}
+      {audioUrl && (
+        <div className="recording-preview">
+          <strong>Listen to your recording</strong>
+          <audio aria-label="Your recorded audio" controls src={audioUrl} />
+          {meterAvailable && !heardSound && (
+            <p>
+              No microphone sound was detected. If playback is silent, check your microphone input
+              or open Pile in Chrome or Safari.
+            </p>
+          )}
+          {error && (
+            <button
+              className="text-button"
+              disabled={busy || recording}
+              onClick={() => audioFile.current && transcribe(audioFile.current)}
+            >
+              Retry transcription
+            </button>
+          )}
         </div>
       )}
       <label className="field-label">

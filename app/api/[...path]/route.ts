@@ -325,7 +325,7 @@ async function handle(req: Request, ctx: Context) {
       )
         throw new Error('The end time must be after the start time.');
       if (patch.project) existing.projectId = (await projectFor(db, user, patch.project)).id;
-      if (patch.status === 'planned') {
+      if (patch.status === 'planned' && Object.keys(patch).length > 1) {
         existing.needsClarification = false;
         existing.confidence = 1;
       }
@@ -341,7 +341,8 @@ async function handle(req: Request, ctx: Context) {
           !(existing.dueDate || existing.startDateTime))
       )
         existing.calendarStatus = 'not_applicable';
-      if (existing.calendarStatus === 'synced') await updateSyncedItem(db, user, existing);
+      if (existing.calendarStatus === 'synced' && Object.keys(patch).some((k) => k !== 'status'))
+        await updateSyncedItem(db, user, existing);
       else await saveItem(db, existing);
       try {
         await indexItems(db, user, [existing]);

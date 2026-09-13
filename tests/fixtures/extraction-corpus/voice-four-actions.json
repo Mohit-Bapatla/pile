@@ -1,0 +1,35 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-four-actions",
+  "category": "voice",
+  "text": "Call mom, buy toothpaste, upload my resume, and I have a meeting with Sarah Thursday at two.",
+  "expected": [
+    {
+      "title": "Call mom",
+      "type": "reminder"
+    },
+    {
+      "title": "Buy toothpaste",
+      "type": "task"
+    },
+    {
+      "title": "Upload resume",
+      "type": "task"
+    },
+    {
+      "title": "Meeting with Sarah",
+      "type": "event",
+      "date": "2026-09-17T19:00:00.000Z"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

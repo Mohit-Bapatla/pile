@@ -1,0 +1,22 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "text-undated",
+  "category": "text",
+  "text": "Finish the slides",
+  "expected": [
+    {
+      "title": "Finish slides",
+      "type": "task"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

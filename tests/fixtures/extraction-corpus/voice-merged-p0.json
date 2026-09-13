@@ -1,0 +1,33 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-merged-p0",
+  "category": "voice",
+  "text": "A probability test. I have a linear algebra midterm on Wednesday and calc homework due Friday.",
+  "expected": [
+    {
+      "title": "Probability test",
+      "type": "event",
+      "needsClarification": true
+    },
+    {
+      "title": "Linear algebra midterm",
+      "type": "event",
+      "date": "2026-09-16"
+    },
+    {
+      "title": "Calculus homework",
+      "type": "deadline",
+      "date": "2026-09-18"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

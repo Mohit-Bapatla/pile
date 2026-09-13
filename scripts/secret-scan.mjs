@@ -14,7 +14,7 @@ const forbidden =
 const failures = [];
 for (const file of files) {
   if (file !== '.env.example' && forbidden.test(file)) failures.push(file + ': forbidden artifact');
-  if (/\.(png|pdf|woff2?)$/.test(file)) continue;
+  if (/\.(png|jpe?g|pdf|woff2?)$/.test(file)) continue;
   const text = execFileSync('git', ['show', ':' + file], { encoding: 'utf8' });
   if (
     secrets.some((pattern) => {

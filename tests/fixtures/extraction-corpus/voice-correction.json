@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-correction",
+  "category": "voice",
+  "text": "Dentist Tuesday at three, wait sorry Wednesday at three, and submit the project Friday.",
+  "expected": [
+    {
+      "title": "Dentist appointment",
+      "type": "event",
+      "date": "2026-09-16T20:00:00.000Z"
+    },
+    {
+      "title": "Submit project",
+      "type": "task",
+      "date": "2026-09-18"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

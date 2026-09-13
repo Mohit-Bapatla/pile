@@ -20,8 +20,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm db:migrate && pnpm db:seed
       - run: pnpm lint && pnpm typecheck
       - run: pnpm test:unit && pnpm test:integration
       - run: pnpm test:e2e
+      - run: pnpm eval:extraction
+      - run: pnpm secret:scan
       - run: pnpm build

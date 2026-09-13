@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-two-dates",
+  "category": "voice",
+  "text": "Email Maya tomorrow and finish the slides tonight.",
+  "expected": [
+    {
+      "title": "Email Maya",
+      "type": "task",
+      "date": "2026-09-13"
+    },
+    {
+      "title": "Finish slides",
+      "type": "task",
+      "date": "2026-09-13T00:00:00.000Z"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-duplicate",
+  "category": "voice",
+  "text": "I need to email Maya tomorrow, and yeah definitely email Maya tomorrow, then homework Friday.",
+  "expected": [
+    {
+      "title": "Email Maya",
+      "type": "task",
+      "date": "2026-09-13"
+    },
+    {
+      "title": "Homework",
+      "type": "deadline",
+      "date": "2026-09-18"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

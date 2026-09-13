@@ -1,0 +1,37 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "recurring-syllabus",
+  "category": "syllabus",
+  "text": "UGS 303 Ethics\nSyllabus \u00b7 Fall 2026\nInstructor: Jane Ellis\nTerm: August 24, 2026 to December 11, 2026\nMeetings: on Tues. and Thur. 9:30\u201310:45 AM in CAL 100 + section every Fri 11:00\u201311:50 AM in RLP 0.102",
+  "expected": [
+    {
+      "title": "UGS 303 Lecture",
+      "type": "event",
+      "date": "2026-08-25T14:30:00.000Z",
+      "recurrence": [
+        "TU",
+        "TH"
+      ],
+      "location": "CAL 100"
+    },
+    {
+      "title": "UGS 303 Discussion",
+      "type": "event",
+      "date": "2026-08-28T16:00:00.000Z",
+      "recurrence": [
+        "FR"
+      ],
+      "location": "RLP 0.102"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

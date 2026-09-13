@@ -1,3 +1,4 @@
+import { fromZonedTime } from 'date-fns-tz';
 import type { DB } from './db';
 import { candidateKey } from './actionability';
 import {
@@ -241,4 +242,81 @@ export async function deleteSource(db: DB, user: string, id: string) {
   if (linked.rows.length)
     throw new Error('Remove linked calendar events before deleting this source.');
   await db.query('DELETE FROM sources WHERE id=$1 AND user_id=$2', [id, user]);
+}
+
+/** Deliberate recording state; automated tests use the original seed in their temporary database. */
+export async function seedRecording(db: DB, user: string) {
+  if ((await db.query('SELECT id FROM sources WHERE user_id=$1', [user])).rows.length) return;
+  const today = localDate(new Date(), 'America/Chicago');
+  const next = (weekday: number) => {
+    const start = new Date(today + 'T12:00:00Z');
+    let delta = (weekday - start.getUTCDay() + 7) % 7;
+    if (!delta) delta = 7;
+    return new Date(Date.parse(today) + delta * 86400000).toISOString().slice(0, 10);
+  };
+  const source: Source = {
+    id: crypto.randomUUID(),
+    userId: user,
+    type: 'text',
+    rawText:
+      'Demo starting board: Finish HackRice demo; Email Maya; Probability homework; Dentist appointment; A quieter internet, one tab at a time.',
+    createdAt: new Date().toISOString(),
+    processingStatus: 'queued',
+    timezone: 'America/Chicago',
+    provider: 'Curated demo',
+  };
+  await saveSource(db, source);
+  const base = { priority: 'medium' as const, confidence: 1, needsClarification: false };
+  const items = await commitExtraction(db, source, {
+    summary: 'Five intentional examples for the recording.',
+    items: [
+      { ...base, type: 'task', title: 'Finish HackRice demo', project: 'HackRice', dueDate: today },
+      { ...base, type: 'task', title: 'Email Maya', project: 'Personal', dueDate: today },
+      {
+        ...base,
+        type: 'deadline',
+        title: 'Probability homework',
+        project: 'Probability',
+        dueDate: next(0),
+        allDay: true,
+      },
+      {
+        ...base,
+        type: 'event',
+        title: 'Dentist appointment',
+        project: 'Personal',
+        startDateTime: fromZonedTime(next(2) + 'T15:00:00', 'America/Chicago').toISOString(),
+      },
+      {
+        ...base,
+        type: 'idea',
+        title: 'A quieter internet, one tab at a time',
+        project: 'Personal',
+      },
+    ],
+  });
+  for (const item of items) {
+    item.calendarStatus = 'not_applicable';
+    await saveItem(db, item);
+  }
+  source.processingStatus = 'parsed';
+  await updateSource(db, source);
+  for (const [title, day, hour] of [
+    ['Design catch-up', today, 14],
+    ['Coffee with Maya', next(0), 10],
+    ['Team check-in', next(1), 11],
+  ] as const) {
+    const event: CalendarEvent = {
+      id: crypto.randomUUID(),
+      title,
+      start: fromZonedTime(`${day}T${hour}:00:00`, 'America/Chicago').toISOString(),
+      allDay: false,
+      demo: true,
+    };
+    await db.query('INSERT INTO calendar_links(id,user_id,body) VALUES($1,$2,$3)', [
+      event.id,
+      user,
+      JSON.stringify(event),
+    ]);
+  }
 }

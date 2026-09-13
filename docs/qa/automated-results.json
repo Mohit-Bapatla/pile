@@ -1,0 +1,24 @@
+{
+  "unitPassed": 57,
+  "integrationPassed": 36,
+  "e2ePassed": 40,
+  "e2eDuration": "2.5m",
+  "functionalTotal": 133,
+  "lint": "passed",
+  "typecheck": "passed",
+  "build": "passed",
+  "extractionCases": 54,
+  "expectedItems": 81,
+  "matchedItems": 81,
+  "visualRouteViewportChecks": 48,
+  "pdfPagingChecks": 2,
+  "resetGuards": {
+    "runningServer": "aborted",
+    "remoteDatabaseUrl": "aborted"
+  },
+  "notes": [
+    "Final E2E run was serial and green. Earlier failed runs are not combined into this total.",
+    "Native Safari and physical microphone were blocked by the locked Mac.",
+    "Live Google, Backboard and Tiger credentials were absent."
+  ]
+}

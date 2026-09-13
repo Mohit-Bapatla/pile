@@ -1,4 +1,5 @@
 import type { Extraction, ExtractedItem } from './model';
+import { isPolicyOrDescription, normalizeActionTitle } from './intents';
 export function normalizedTitle(value: string) {
   return value
     .toLowerCase()
@@ -13,13 +14,19 @@ export function candidateKey(item: ExtractedItem) {
 export function actionability(item: ExtractedItem) {
   const text = `${item.title} ${item.description || ''}`;
   if (
+    item.title.length > 80 ||
+    !/[a-z]{2}/i.test(item.title) ||
+    isPolicyOrDescription(item.evidence || text)
+  )
+    return 0;
+  if (
     /^(overview|course overview|course resources|weekly schedule|key dates|instructor|professor|canvas|copyright|grading philosophy|attendees)\b/i.test(
       item.title,
     ) &&
     !/\b(due|deadline|exam|appointment)\b/i.test(item.title)
   )
     return 0;
-  if (/^(?:https?:\/\/|[\w.+-]+@[\w.-]+\.)/.test(item.title)) return 0;
+  if (/^(?:https?:\/\/|[\w.+-]+@[\w.-]+\.)/i.test(item.title)) return 0;
   if (item.tier === 'optional' || /office hours|tutoring|optional|review session/i.test(text))
     return 45;
   let score = 0;
@@ -36,6 +43,7 @@ export function filterExtraction(extraction: Extraction, _document: boolean): Ex
   void _document;
   const seen = new Set<string>();
   const items = extraction.items
+    .map((i) => ({ ...i, title: normalizeActionTitle(i.title) }))
     .filter((i) => {
       const key = candidateKey(i);
       if (seen.has(key)) return false;

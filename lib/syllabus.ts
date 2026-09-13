@@ -2,12 +2,13 @@ import { fromZonedTime } from 'date-fns-tz';
 import type { ParseContext, resolveDate } from './ai';
 import type { Extraction, ExtractedItem, CourseMetadata } from './model';
 import { filterExtraction } from './actionability';
+import { assessment, explicitDate, isPolicyOrDescription, normalizeActionTitle } from './intents';
 const weekdays = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'] as const;
 const dayWords: [RegExp, (typeof weekdays)[number]][] = [
   [/\bmon(?:day)?\b/i, 'MO'],
-  [/\btue(?:sday)?\b/i, 'TU'],
+  [/\btue(?:s(?:day)?)?\b/i, 'TU'],
   [/\bwed(?:nesday)?\b/i, 'WE'],
-  [/\bthu(?:rsday)?\b/i, 'TH'],
+  [/\bthu(?:r(?:s(?:day)?)?)?\b/i, 'TH'],
   [/\bfri(?:day)?\b/i, 'FR'],
   [/\bsat(?:urday)?\b/i, 'SA'],
   [/\bsun(?:day)?\b/i, 'SU'],
@@ -23,7 +24,8 @@ export function parseSyllabus(
   )
     return;
   const lines = text
-    .split(/\n/)
+    .replace(/\s*\+\s*(?=(?:section|discussion|lab)\b)/gi, '\nDiscussion: ')
+    .split(/\n|\.\s+(?=Submit|Complete|Essay|Observation|Midterm)/)
     .map((l) => l.trim())
     .filter(Boolean);
   const course = text.match(/\b([A-Z]{2,5})\s?(\d{3}[A-Z]?)\b/)?.[0];
@@ -57,11 +59,18 @@ export function parseSyllabus(
   };
   const items: ExtractedItem[] = [];
   let assessmentTable = false;
-  for (const line of lines) {
+  let assignmentColumn = -1;
+  for (const rawLine of lines) {
+    let line = rawLine;
+    if (/Assignment.*\|.*Due/i.test(line))
+      assignmentColumn = line.split('|').findIndex((c) => /assignment/i.test(c));
+    else if (assignmentColumn >= 0 && line.includes('|')) {
+      const cells = line.split('|').map((c) => c.trim());
+      line = `${cells[assignmentColumn]} due ${cells.at(-1)}`;
+    }
     if (/assignment.*(?:due|date)|assessment.*date/i.test(line)) assessmentTable = true;
-    const schedule = /^(meetings|class schedule|discussion|lab|office hours|tutoring)\b/i.test(
-      line,
-    );
+    const schedule =
+      /^(meetings|class schedule|discussion|lab(?! report)|office hours|tutoring)\b/i.test(line);
     if (schedule) {
       const days = dayWords.filter(([r]) => r.test(line)).map(([, d]) => d);
       if (!days.length) continue;
@@ -96,8 +105,8 @@ export function parseSyllabus(
       items.push({
         type: 'event',
         title: /^(meetings|class schedule)/i.test(line)
-          ? `${course || courseName} class`
-          : line.split(':')[0],
+          ? `${course || courseName} Lecture`
+          : `${course || courseName} ${line.match(/^(discussion|lab(?! report)|office hours|tutoring)/i)?.[1] || 'Schedule'}`,
         description: line,
         evidence: line,
         project,
@@ -124,7 +133,7 @@ export function parseSyllabus(
     const scheduleChange = /\b(no class|cancelled|canceled|rescheduled|moved to)\b/i.test(line);
     // Assessment rows must carry both a date and an explicit assessment/action signal.
     if (
-      (!/\b(due|deadline|exam|midterm|quiz|proposal|final project|assignment|registration|payment|cancelled)\b/i.test(
+      (!/\b(due|deadline|exam|midterm|quiz|proposal|essay|observation|report|final project|assignment|registration|payment|cancelled)\b/i.test(
         line,
       ) &&
         !scheduleChange &&
@@ -132,6 +141,9 @@ export function parseSyllabus(
       line.length > 240
     )
       continue;
+    if (isPolicyOrDescription(line) || !explicitDate.test(line)) continue;
+    // A table position is not evidence of an assignment; require a named deliverable.
+    if (!assessment.test(line) && !scheduleChange) continue;
     const d = resolve(line, datedContext);
     if (!d.date) continue;
     const type = scheduleChange
@@ -139,11 +151,15 @@ export function parseSyllabus(
       : /\b(exam|midterm|quiz)\b/i.test(line)
         ? 'event'
         : 'deadline';
-    const title = line
-      .replace(d.matched || '', '')
-      .replace(/^\s*[|:—–-]+|[|:—–-]+\s*$/g, '')
-      .replace(/\b(due|by|on)\s*$/i, '')
-      .trim();
+    const title = normalizeActionTitle(
+      line
+        .replace(d.matched || '', '')
+        .replace(/^\s*[|:—–-]+|[|:—–-]+\s*$/g, '')
+        .replace(/\b(due|by|on)\s*$/i, '')
+        .replace(/\s*\|\s*(?:via\s+)?Canvas.*$/i, '')
+        .replace(/\bvia\s+Canvas\s*\d*%?$/i, '')
+        .trim(),
+    );
     items.push({
       type,
       title,

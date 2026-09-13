@@ -1,0 +1,43 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "formats-syllabus",
+  "category": "syllabus",
+  "text": "UGS 303 Ethics\nSyllabus \u00b7 Fall 2026\nInstructor: Jane Ellis\nTerm: August 24, 2026 to December 11, 2026\nEssay 1 due Sep 18\nEssay 2 due September 19, 2026\nEssay 3 due 9/20\nEssay 4 due Monday, September 21\nEssay 5 due 22 September",
+  "expected": [
+    {
+      "title": "Essay 1",
+      "type": "deadline",
+      "date": "2026-09-18"
+    },
+    {
+      "title": "Essay 2",
+      "type": "deadline",
+      "date": "2026-09-19"
+    },
+    {
+      "title": "Essay 3",
+      "type": "deadline",
+      "date": "2026-09-20"
+    },
+    {
+      "title": "Essay 4",
+      "type": "deadline",
+      "date": "2026-09-21"
+    },
+    {
+      "title": "Essay 5",
+      "type": "deadline",
+      "date": "2026-09-22"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

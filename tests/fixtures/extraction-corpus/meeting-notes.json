@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "meeting-notes",
+  "category": "meeting notes",
+  "text": "Attendees: Maya, Jordan\nDiscussion: the office is nice.\nDecisions: use the green design.\nActions\nEmail Maya tomorrow\nSubmit project proposal Friday",
+  "expected": [
+    {
+      "title": "Email Maya",
+      "type": "task",
+      "date": "2026-09-13"
+    },
+    {
+      "title": "Submit project proposal",
+      "type": "task",
+      "date": "2026-09-18"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

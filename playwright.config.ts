@@ -6,7 +6,7 @@ export default defineConfig({
   timeout: 45000,
   expect: { timeout: 15000 },
   use: {
-    baseURL: 'http://127.0.0.1:3001',
+    baseURL: 'http://127.0.0.1:3002',
     trace: 'retain-on-failure',
     launchOptions: {
       args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'],
@@ -15,9 +15,9 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
   },
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://127.0.0.1:3001',
-    reuseExistingServer: !process.env.CI,
+    command: 'node scripts/qa-server.mjs',
+    url: 'http://127.0.0.1:3002',
+    reuseExistingServer: false,
     timeout: 120000,
   },
   reporter: [['list'], ['html', { open: 'never' }]],

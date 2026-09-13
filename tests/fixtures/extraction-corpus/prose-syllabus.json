@@ -1,0 +1,23 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "prose-syllabus",
+  "category": "syllabus",
+  "text": "UGS 303 Ethics\nSyllabus \u00b7 Fall 2026\nInstructor: Jane Ellis\nTerm: August 24, 2026 to December 11, 2026\nWe study ethical questions. Submit the final essay by October 15.\nWe aim to respond to emails if received on weekdays; sometimes delays occur due to other commitments.",
+  "expected": [
+    {
+      "title": "Submit final essay",
+      "type": "deadline",
+      "date": "2026-10-15"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

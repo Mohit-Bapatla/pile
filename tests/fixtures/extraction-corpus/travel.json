@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "travel",
+  "category": "travel itinerary",
+  "text": "Flight to Boston October 15 at 9 AM\nPack passport tomorrow",
+  "expected": [
+    {
+      "title": "Flight to Boston",
+      "type": "event",
+      "date": "2026-10-15T14:00:00.000Z"
+    },
+    {
+      "title": "Pack passport",
+      "type": "task",
+      "date": "2026-09-13"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

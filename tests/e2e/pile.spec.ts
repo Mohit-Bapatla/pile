@@ -133,8 +133,8 @@ test('rejects cross-origin writes and protects session-owned records', async ({
 }) => {
   const data = await (await page.request.get('/api/state')).json();
   const other = await browser.newContext();
-  await other.request.get('http://127.0.0.1:3001/api/state');
-  const r = await other.request.patch('http://127.0.0.1:3001/api/items/' + data.items[0].id, {
+  await other.request.get('http://127.0.0.1:3002/api/state');
+  const r = await other.request.patch('http://127.0.0.1:3002/api/items/' + data.items[0].id, {
     data: { title: 'Changed' },
   });
   expect(r.ok()).toBe(false);

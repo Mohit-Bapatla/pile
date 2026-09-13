@@ -106,7 +106,7 @@ test('recording is keyboard accessible, stops recording, and honors reduced moti
   ).toBe('none');
   await page.getByRole('button', { name: 'Stop recording' }).press('Enter');
   await expect(page.getByRole('button', { name: 'Start recording' })).toBeVisible();
-  await expect(page.getByRole('alert')).toContainText('Transcription isn’t configured');
+  await expect(page.getByRole('alert')).toContainText('Transcription is not configured');
   const report = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
     .analyze();

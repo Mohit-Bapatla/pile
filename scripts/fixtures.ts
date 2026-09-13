@@ -114,6 +114,23 @@ heading('Academic integrity');
 paragraph(
   "The distinction between one's own interpretation and the work of others should remain visible. Quotation, paraphrase and borrowed ideas all need appropriate attribution. The purpose of citation is to make an intellectual conversation traceable, giving readers a path back to the materials that shaped an argument.",
 );
+nextPage('Policies & grading');
+heading('Extensions and communication');
+paragraph(
+  'Requests must be submitted at least one week in advance. Extensions may be granted for documented circumstances. Late work may receive reduced credit. Students should contact the professor if they need accommodations. These policies explain the process; they are not individual assignments.',
+);
+paragraph(
+  'We aim to respond to emails if received on weekdays; sometimes delays occur due to other commitments. Email response times are not assignment deadlines.',
+);
+heading('Grading overview');
+text('Canvas quizzes - 5%');
+text('Participation - 10%');
+text('Observation portfolio - 25%');
+text('Midterm - 20%');
+text('Final project - 40%');
+paragraph(
+  'The final grade is based on the assessments above. Submit work through Canvas using the dates listed in Key Dates. This table describes weights, not additional deliverables.',
+);
 for (const [index, p] of doc.getPages().entries()) {
   p.drawLine({ start: { x: 52, y: 43 }, end: { x: 560, y: 43 }, color: line, thickness: 0.5 });
   p.drawText(
@@ -148,4 +165,4 @@ The group discussed how the demo moves between capture and calendar. The transit
 Everyone preferred a quiet visual treatment. The paper palette and restrained typography give the content room to speak. Additional decorative elements would distract from the central interaction.
 `,
 );
-console.log('Created three-page syllabus, typographic flyer and meeting notes.');
+console.log('Created four-page syllabus, typographic flyer and meeting notes.');

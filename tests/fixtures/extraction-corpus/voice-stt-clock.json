@@ -1,0 +1,22 @@
+{
+  "id": "voice-stt-clock",
+  "category": "voice",
+  "now": "2026-09-12T17:00:00.000Z",
+  "timezone": "America/Chicago",
+  "text": "My dentist appointment is Tuesday at 3:00. Email Maya tomorrow.",
+  "expected": [
+    {
+      "title": "Dentist appointment",
+      "type": "event",
+      "date": "2026-09-15T20:00:00.000Z"
+    },
+    {
+      "title": "Email Maya",
+      "type": "task",
+      "date": "2026-09-13"
+    }
+  ],
+  "optional": [],
+  "metadata": {},
+  "forbidden": []
+}

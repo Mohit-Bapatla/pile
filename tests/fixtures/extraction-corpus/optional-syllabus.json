@@ -1,0 +1,27 @@
+{
+  "id": "optional-syllabus",
+  "category": "syllabus",
+  "text": "UGS 303 Ethics\nSyllabus \u00b7 Fall 2026\nInstructor: Jane Ellis\nTerm: August 24, 2026 to December 11, 2026\nOffice hours: Tuesday 2-4 PM in CAL 214\nTutoring: Wednesday at 6 PM in Learning Commons",
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "expected": [],
+  "optional": [
+    {
+      "title": "UGS 303 Office hours",
+      "type": "event",
+      "date": "2026-08-25T19:00:00.000Z",
+      "recurrence": [
+        "TU"
+      ]
+    },
+    {
+      "title": "UGS 303 Tutoring",
+      "type": "event",
+      "date": "2026-08-26T23:00:00.000Z",
+      "recurrence": [
+        "WE"
+      ]
+    }
+  ],
+  "forbidden": []
+}

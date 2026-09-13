@@ -1,0 +1,23 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-ambiguous",
+  "category": "voice",
+  "text": "I need to finish the report sometime this weekend.",
+  "expected": [
+    {
+      "title": "Finish report",
+      "type": "task",
+      "needsClarification": true
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

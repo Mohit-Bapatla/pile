@@ -1,0 +1,33 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-disfluent",
+  "category": "voice",
+  "text": "Okay so uh I need to like email Maya tomorrow and then probably do the calc homework Friday, oh and dentist Tuesday at three.",
+  "expected": [
+    {
+      "title": "Email Maya",
+      "type": "task",
+      "date": "2026-09-13"
+    },
+    {
+      "title": "Calculus homework",
+      "type": "deadline",
+      "date": "2026-09-18"
+    },
+    {
+      "title": "Dentist appointment",
+      "type": "event",
+      "date": "2026-09-15T20:00:00.000Z"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

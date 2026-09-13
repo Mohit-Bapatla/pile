@@ -1,0 +1,33 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "text-bullets",
+  "category": "text",
+  "text": "- finish slides tonight\n- email professor tomorrow\n- club meeting thursday at 6 PM",
+  "expected": [
+    {
+      "title": "Finish slides",
+      "type": "task",
+      "date": "2026-09-13T00:00:00.000Z"
+    },
+    {
+      "title": "Email professor",
+      "type": "task",
+      "date": "2026-09-13"
+    },
+    {
+      "title": "Club meeting",
+      "type": "event",
+      "date": "2026-09-17T23:00:00.000Z"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

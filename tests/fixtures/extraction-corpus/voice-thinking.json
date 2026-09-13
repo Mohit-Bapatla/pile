@@ -1,0 +1,17 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "voice-thinking",
+  "category": "voice",
+  "text": "No actual tasks here, I am just thinking out loud about whether I like Austin.",
+  "expected": [],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

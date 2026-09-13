@@ -13,3 +13,6 @@ test-results/
 .data/
 next-env.d.ts
 *.tsbuildinfo
+
+# Full-size QA captures stay local; compact contact sheets are versioned.
+/docs/screenshots/qa/*.png

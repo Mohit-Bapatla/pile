@@ -1,0 +1,15 @@
+{
+  "id": "text-month-name",
+  "category": "text",
+  "text": "Email Juniper about the demo",
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "expected": [
+    {
+      "title": "Email Juniper about the demo",
+      "type": "task"
+    }
+  ],
+  "optional": [],
+  "forbidden": []
+}

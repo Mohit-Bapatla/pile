@@ -1,0 +1,23 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "text-shorthand",
+  "category": "text",
+  "text": "calc homework fri",
+  "expected": [
+    {
+      "title": "Calculus homework",
+      "type": "deadline",
+      "date": "2026-09-18"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

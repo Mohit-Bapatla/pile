@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "conference",
+  "category": "conference agenda",
+  "text": "Conference agenda\nOpening ceremony October 15 at 9 AM in Main Hall\nNetworking meeting October 15 at 2 PM in Room A",
+  "expected": [
+    {
+      "title": "Opening ceremony",
+      "type": "event",
+      "date": "2026-10-15T14:00:00.000Z"
+    },
+    {
+      "title": "Networking meeting",
+      "type": "event",
+      "date": "2026-10-15T19:00:00.000Z"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

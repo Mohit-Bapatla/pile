@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "doctor",
+  "category": "appointment instructions",
+  "text": "Dentist appointment Tuesday at 3 PM\nBring insurance card Tuesday\nWe aim to respond to emails within one week.",
+  "expected": [
+    {
+      "title": "Dentist appointment",
+      "type": "event",
+      "date": "2026-09-15T20:00:00.000Z"
+    },
+    {
+      "title": "Bring insurance card",
+      "type": "task",
+      "date": "2026-09-15"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

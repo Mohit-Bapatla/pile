@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-09-13T04:21:36.017Z",
+  "viewport": "1440×900",
+  "sources": 1,
+  "items": [
+    {
+      "title": "Finish HackRice demo",
+      "type": "task",
+      "date": "2026-09-12",
+      "project": "HackRice",
+      "status": "planned",
+      "calendarStatus": "not_applicable",
+      "needsClarification": false
+    },
+    {
+      "title": "Email Maya",
+      "type": "task",
+      "date": "2026-09-12",
+      "project": "Personal",
+      "status": "planned",
+      "calendarStatus": "not_applicable",
+      "needsClarification": false
+    },
+    {
+      "title": "Probability homework",
+      "type": "deadline",
+      "date": "2026-09-13",
+      "project": "Probability",
+      "status": "planned",
+      "calendarStatus": "not_applicable",
+      "needsClarification": false
+    },
+    {
+      "title": "Dentist appointment",
+      "type": "event",
+      "date": "2026-09-15T20:00:00.000Z",
+      "project": "Personal",
+      "status": "planned",
+      "calendarStatus": "not_applicable",
+      "needsClarification": false
+    },
+    {
+      "title": "A quieter internet, one tab at a time",
+      "type": "idea",
+      "project": "Personal",
+      "status": "planned",
+      "calendarStatus": "not_applicable",
+      "needsClarification": false
+    }
+  ],
+  "externalDemoEvents": [
+    {
+      "title": "Design catch-up",
+      "start": "2026-09-12T19:00:00.000Z",
+      "demo": true
+    },
+    {
+      "title": "Coffee with Maya",
+      "start": "2026-09-13T15:00:00.000Z",
+      "demo": true
+    },
+    {
+      "title": "Team check-in",
+      "start": "2026-09-14T16:00:00.000Z",
+      "demo": true
+    }
+  ],
+  "providerConfig": {
+    "demo": true,
+    "ai": "Demo · local rules",
+    "voice": true,
+    "elevenlabs": "Configured",
+    "backboard": "Not configured",
+    "persistence": "Local PostgreSQL",
+    "googleConfigured": false,
+    "calendar": "Demo calendar",
+    "googleConnected": false
+  },
+  "errors": []
+}

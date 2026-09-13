@@ -81,7 +81,7 @@ export const extractionSchema = z
     summary: z.string().max(1000),
     suggestedProject: z.string().max(80).optional(),
     metadata: metadataSchema.optional(),
-    items: z.array(extractedItemSchema).max(50),
+    items: z.array(extractedItemSchema).max(100),
   })
   .strict();
 export type Extraction = z.infer<typeof extractionSchema>;

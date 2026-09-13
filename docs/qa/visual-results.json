@@ -1,0 +1,1007 @@
+[
+  {
+    "browser": "chromium",
+    "width": 1512,
+    "height": 982,
+    "route": "board",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Completed",
+      "New item",
+      "",
+      "",
+      "Finish HackRice demoBring the story together. Show the magic capture moment, then the calendar.",
+      "",
+      "Original thought↗",
+      "",
+      "Email recruiterSend the updated résumé and a quick thank-you.",
+      "",
+      "Original thought↗",
+      "",
+      "Pick up packageWaiting at the front desk. Bring your ID.",
+      "",
+      "Original thought↗",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12, 11:15 PM · 5 items",
+      "",
+      "",
+      "",
+      "Probability homeworkProblem set 03 · conditional probability and Bayes’ theorem.",
+      "",
+      "Original thought↗",
+      "",
+      "",
+      "A quieter internet, one tab at a timeWhat if a browser extension gently closed duplicate tabs? Worth exploring when there’s a little space.",
+      "Original thought↗",
+      "Review & add",
+      "Try a syllabus",
+      "Try an event flyer"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1512,
+    "height": 982,
+    "route": "inbox",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12, 11:15 PM · 5 items",
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1512,
+    "height": 982,
+    "route": "calendar",
+    "overflow": false,
+    "buttons": [
+      "",
+      "",
+      "Today",
+      "",
+      "Design catch-up",
+      "",
+      "Finish HackRice demo",
+      "",
+      "Email recruiter",
+      "",
+      "Pick up package",
+      "Coffee with Maya",
+      "Team check-in",
+      "",
+      "Probability homework"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1512,
+    "height": 982,
+    "route": "projects",
+    "overflow": false,
+    "buttons": [
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1512,
+    "height": 982,
+    "route": "search",
+    "overflow": false,
+    "buttons": [
+      "",
+      "HackRice",
+      "recruiter",
+      "Maya"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1512,
+    "height": 982,
+    "route": "settings",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Save timezone",
+      "Take the 10-second tour"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1440,
+    "height": 900,
+    "route": "board",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Completed",
+      "New item",
+      "",
+      "",
+      "Finish HackRice demoBring the story together. Show the magic capture moment, then the calendar.",
+      "",
+      "Original thought↗",
+      "",
+      "Email recruiterSend the updated résumé and a quick thank-you.",
+      "",
+      "Original thought↗",
+      "",
+      "Pick up packageWaiting at the front desk. Bring your ID.",
+      "",
+      "Original thought↗",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12, 11:15 PM · 5 items",
+      "",
+      "",
+      "",
+      "Probability homeworkProblem set 03 · conditional probability and Bayes’ theorem.",
+      "",
+      "Original thought↗",
+      "",
+      "",
+      "A quieter internet, one tab at a timeWhat if a browser extension gently closed duplicate tabs? Worth exploring when there’s a little space.",
+      "Original thought↗",
+      "Review & add",
+      "Try a syllabus",
+      "Try an event flyer"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1440,
+    "height": 900,
+    "route": "inbox",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12, 11:15 PM · 5 items",
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1440,
+    "height": 900,
+    "route": "calendar",
+    "overflow": false,
+    "buttons": [
+      "",
+      "",
+      "Today",
+      "",
+      "Design catch-up",
+      "",
+      "Finish HackRice demo",
+      "",
+      "Email recruiter",
+      "",
+      "Pick up package",
+      "Coffee with Maya",
+      "Team check-in",
+      "",
+      "Probability homework"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1440,
+    "height": 900,
+    "route": "projects",
+    "overflow": false,
+    "buttons": [
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1440,
+    "height": 900,
+    "route": "search",
+    "overflow": false,
+    "buttons": [
+      "",
+      "HackRice",
+      "recruiter",
+      "Maya"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1440,
+    "height": 900,
+    "route": "settings",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Save timezone",
+      "Take the 10-second tour"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1280,
+    "height": 800,
+    "route": "board",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Completed",
+      "New item",
+      "",
+      "",
+      "Finish HackRice demoBring the story together. Show the magic capture moment, then the calendar.",
+      "",
+      "Original thought↗",
+      "",
+      "Email recruiterSend the updated résumé and a quick thank-you.",
+      "",
+      "Original thought↗",
+      "",
+      "Pick up packageWaiting at the front desk. Bring your ID.",
+      "",
+      "Original thought↗",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12, 11:15 PM · 5 items",
+      "",
+      "",
+      "",
+      "Probability homeworkProblem set 03 · conditional probability and Bayes’ theorem.",
+      "",
+      "Original thought↗",
+      "",
+      "",
+      "A quieter internet, one tab at a timeWhat if a browser extension gently closed duplicate tabs? Worth exploring when there’s a little space.",
+      "Original thought↗",
+      "Review & add",
+      "Try a syllabus",
+      "Try an event flyer"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1280,
+    "height": 800,
+    "route": "inbox",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12, 11:15 PM · 5 items",
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1280,
+    "height": 800,
+    "route": "calendar",
+    "overflow": false,
+    "buttons": [
+      "",
+      "",
+      "Today",
+      "",
+      "Design catch-up",
+      "",
+      "Finish HackRice demo",
+      "",
+      "Email recruiter",
+      "",
+      "Pick up package",
+      "Coffee with Maya",
+      "Team check-in",
+      "",
+      "Probability homework"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1280,
+    "height": 800,
+    "route": "projects",
+    "overflow": false,
+    "buttons": [
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1280,
+    "height": 800,
+    "route": "search",
+    "overflow": false,
+    "buttons": [
+      "",
+      "HackRice",
+      "recruiter",
+      "Maya"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 1280,
+    "height": 800,
+    "route": "settings",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Save timezone",
+      "Take the 10-second tour"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 390,
+    "height": 844,
+    "route": "board",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Completed",
+      "New item",
+      "",
+      "",
+      "Finish HackRice demoBring the story together. Show the magic capture moment, then the calendar.",
+      "",
+      "Original thought↗",
+      "",
+      "Email recruiterSend the updated résumé and a quick thank-you.",
+      "",
+      "Original thought↗",
+      "",
+      "Pick up packageWaiting at the front desk. Bring your ID.",
+      "",
+      "Original thought↗",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12, 11:15 PM · 5 items",
+      "",
+      "",
+      "",
+      "Probability homeworkProblem set 03 · conditional probability and Bayes’ theorem.",
+      "",
+      "Original thought↗",
+      "",
+      "",
+      "A quieter internet, one tab at a timeWhat if a browser extension gently closed duplicate tabs? Worth exploring when there’s a little space.",
+      "Original thought↗",
+      "Review & add",
+      "Try a syllabus",
+      "Try an event flyer"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 390,
+    "height": 844,
+    "route": "inbox",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12, 11:15 PM · 5 items",
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 390,
+    "height": 844,
+    "route": "calendar",
+    "overflow": false,
+    "buttons": [
+      "",
+      "",
+      "Today",
+      "",
+      "Design catch-up",
+      "",
+      "Finish HackRice demo",
+      "",
+      "Email recruiter",
+      "",
+      "Pick up package",
+      "Coffee with Maya",
+      "Team check-in",
+      "",
+      "Probability homework"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 390,
+    "height": 844,
+    "route": "projects",
+    "overflow": false,
+    "buttons": [
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 390,
+    "height": 844,
+    "route": "search",
+    "overflow": false,
+    "buttons": [
+      "",
+      "HackRice",
+      "recruiter",
+      "Maya"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 390,
+    "height": 844,
+    "route": "settings",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Save timezone",
+      "Take the 10-second tour"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "pdfPaging": "passed",
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1512,
+    "height": 982,
+    "route": "board",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Completed",
+      "New item",
+      "",
+      "",
+      "Finish HackRice demoBring the story together. Show the magic capture moment, then the calendar.",
+      "",
+      "Original thought↗",
+      "",
+      "Email recruiterSend the updated résumé and a quick thank-you.",
+      "",
+      "Original thought↗",
+      "",
+      "Pick up packageWaiting at the front desk. Bring your ID.",
+      "",
+      "Original thought↗",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12 at 11:15 PM · 5 items",
+      "",
+      "",
+      "",
+      "Probability homeworkProblem set 03 · conditional probability and Bayes’ theorem.",
+      "",
+      "Original thought↗",
+      "",
+      "",
+      "A quieter internet, one tab at a timeWhat if a browser extension gently closed duplicate tabs? Worth exploring when there’s a little space.",
+      "Original thought↗",
+      "Review & add",
+      "Try a syllabus",
+      "Try an event flyer"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1512,
+    "height": 982,
+    "route": "inbox",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12 at 11:15 PM · 5 items",
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1512,
+    "height": 982,
+    "route": "calendar",
+    "overflow": false,
+    "buttons": [
+      "",
+      "",
+      "Today",
+      "",
+      "Design catch-up",
+      "",
+      "Finish HackRice demo",
+      "",
+      "Email recruiter",
+      "",
+      "Pick up package",
+      "Coffee with Maya",
+      "Team check-in",
+      "",
+      "Probability homework"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1512,
+    "height": 982,
+    "route": "projects",
+    "overflow": false,
+    "buttons": [
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1512,
+    "height": 982,
+    "route": "search",
+    "overflow": false,
+    "buttons": [
+      "",
+      "HackRice",
+      "recruiter",
+      "Maya"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1512,
+    "height": 982,
+    "route": "settings",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Save timezone",
+      "Take the 10-second tour"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1440,
+    "height": 900,
+    "route": "board",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Completed",
+      "New item",
+      "",
+      "",
+      "Finish HackRice demoBring the story together. Show the magic capture moment, then the calendar.",
+      "",
+      "Original thought↗",
+      "",
+      "Email recruiterSend the updated résumé and a quick thank-you.",
+      "",
+      "Original thought↗",
+      "",
+      "Pick up packageWaiting at the front desk. Bring your ID.",
+      "",
+      "Original thought↗",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12 at 11:15 PM · 5 items",
+      "",
+      "",
+      "",
+      "Probability homeworkProblem set 03 · conditional probability and Bayes’ theorem.",
+      "",
+      "Original thought↗",
+      "",
+      "",
+      "A quieter internet, one tab at a timeWhat if a browser extension gently closed duplicate tabs? Worth exploring when there’s a little space.",
+      "Original thought↗",
+      "Review & add",
+      "Try a syllabus",
+      "Try an event flyer"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1440,
+    "height": 900,
+    "route": "inbox",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12 at 11:15 PM · 5 items",
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1440,
+    "height": 900,
+    "route": "calendar",
+    "overflow": false,
+    "buttons": [
+      "",
+      "",
+      "Today",
+      "",
+      "Design catch-up",
+      "",
+      "Finish HackRice demo",
+      "",
+      "Email recruiter",
+      "",
+      "Pick up package",
+      "Coffee with Maya",
+      "Team check-in",
+      "",
+      "Probability homework"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1440,
+    "height": 900,
+    "route": "projects",
+    "overflow": false,
+    "buttons": [
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1440,
+    "height": 900,
+    "route": "search",
+    "overflow": false,
+    "buttons": [
+      "",
+      "HackRice",
+      "recruiter",
+      "Maya"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1440,
+    "height": 900,
+    "route": "settings",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Save timezone",
+      "Take the 10-second tour"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1280,
+    "height": 800,
+    "route": "board",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Completed",
+      "New item",
+      "",
+      "",
+      "Finish HackRice demoBring the story together. Show the magic capture moment, then the calendar.",
+      "",
+      "Original thought↗",
+      "",
+      "Email recruiterSend the updated résumé and a quick thank-you.",
+      "",
+      "Original thought↗",
+      "",
+      "Pick up packageWaiting at the front desk. Bring your ID.",
+      "",
+      "Original thought↗",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12 at 11:15 PM · 5 items",
+      "",
+      "",
+      "",
+      "Probability homeworkProblem set 03 · conditional probability and Bayes’ theorem.",
+      "",
+      "Original thought↗",
+      "",
+      "",
+      "A quieter internet, one tab at a timeWhat if a browser extension gently closed duplicate tabs? Worth exploring when there’s a little space.",
+      "Original thought↗",
+      "Review & add",
+      "Try a syllabus",
+      "Try an event flyer"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1280,
+    "height": 800,
+    "route": "inbox",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12 at 11:15 PM · 5 items",
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1280,
+    "height": 800,
+    "route": "calendar",
+    "overflow": false,
+    "buttons": [
+      "",
+      "",
+      "Today",
+      "",
+      "Design catch-up",
+      "",
+      "Finish HackRice demo",
+      "",
+      "Email recruiter",
+      "",
+      "Pick up package",
+      "Coffee with Maya",
+      "Team check-in",
+      "",
+      "Probability homework"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1280,
+    "height": 800,
+    "route": "projects",
+    "overflow": false,
+    "buttons": [
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1280,
+    "height": 800,
+    "route": "search",
+    "overflow": false,
+    "buttons": [
+      "",
+      "HackRice",
+      "recruiter",
+      "Maya"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 1280,
+    "height": 800,
+    "route": "settings",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Save timezone",
+      "Take the 10-second tour"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 390,
+    "height": 844,
+    "route": "board",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Completed",
+      "New item",
+      "",
+      "",
+      "Finish HackRice demoBring the story together. Show the magic capture moment, then the calendar.",
+      "",
+      "Original thought↗",
+      "",
+      "Email recruiterSend the updated résumé and a quick thank-you.",
+      "",
+      "Original thought↗",
+      "",
+      "Pick up packageWaiting at the front desk. Bring your ID.",
+      "",
+      "Original thought↗",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12 at 11:15 PM · 5 items",
+      "",
+      "",
+      "",
+      "Probability homeworkProblem set 03 · conditional probability and Bayes’ theorem.",
+      "",
+      "Original thought↗",
+      "",
+      "",
+      "A quieter internet, one tab at a timeWhat if a browser extension gently closed duplicate tabs? Worth exploring when there’s a little space.",
+      "Original thought↗",
+      "Review & add",
+      "Try a syllabus",
+      "Try an event flyer"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 390,
+    "height": 844,
+    "route": "inbox",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Talk it out",
+      "Attach a file",
+      "Sort my pile",
+      "",
+      "Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quieter internet, one tab at a time.Finish HackRice demo. Probability homework. Email recruiter. Pick up package. Idea: a quietext · Sep 12 at 11:15 PM · 5 items",
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 390,
+    "height": 844,
+    "route": "calendar",
+    "overflow": false,
+    "buttons": [
+      "",
+      "",
+      "Today",
+      "",
+      "Design catch-up",
+      "",
+      "Finish HackRice demo",
+      "",
+      "Email recruiter",
+      "",
+      "Pick up package",
+      "Coffee with Maya",
+      "Team check-in",
+      "",
+      "Probability homework"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 390,
+    "height": 844,
+    "route": "projects",
+    "overflow": false,
+    "buttons": [
+      ""
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 390,
+    "height": 844,
+    "route": "search",
+    "overflow": false,
+    "buttons": [
+      "",
+      "HackRice",
+      "recruiter",
+      "Maya"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 390,
+    "height": 844,
+    "route": "settings",
+    "overflow": false,
+    "buttons": [
+      "",
+      "Save timezone",
+      "Take the 10-second tour"
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "pdfPaging": "passed",
+    "errors": [
+      "/127.0.0.1:3003/app/search?_rsc=UVd2usJEOykhXMMt due to access control checks.",
+      "/127.0.0.1:3003/app/settings?_rsc=UVd2usJEOykhXMMt due to access control checks."
+    ]
+  }
+]

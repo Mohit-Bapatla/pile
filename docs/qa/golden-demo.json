@@ -1,0 +1,76 @@
+[
+  {
+    "name": "academic-voice",
+    "transcript": "I have a probability test, linear algebra midterm Wednesday, and calculus homework due Friday.",
+    "editedTranscript": "I have a probability test, linear algebra midterm Wednesday, and calculus homework due Friday.",
+    "provider": "ElevenLabs",
+    "demo": false,
+    "items": [
+      {
+        "title": "Probability test",
+        "type": "event",
+        "needsClarification": true,
+        "project": "Probability"
+      },
+      {
+        "title": "Linear algebra midterm",
+        "type": "event",
+        "date": "2026-09-16",
+        "needsClarification": false,
+        "project": "Linear Algebra"
+      },
+      {
+        "title": "Calculus homework",
+        "type": "deadline",
+        "date": "2026-09-18",
+        "needsClarification": false,
+        "project": "Calculus"
+      }
+    ],
+    "sourceCount": 1,
+    "errors": [],
+    "input": "Generated speech fed through Chromium microphone capture, then real ElevenLabs API; not a physical microphone test."
+  },
+  {
+    "name": "golden-voice",
+    "transcript": "I need to finish the Hackry submission tomorrow morning, email Maya tonight, and my dentist appointment is Tuesday at three.",
+    "editedTranscript": "I need to finish the HackRice submission tomorrow morning, email Maya tonight, and my dentist appointment is Tuesday at three.",
+    "provider": "ElevenLabs",
+    "demo": false,
+    "items": [
+      {
+        "title": "Finish HackRice submission",
+        "type": "task",
+        "date": "2026-09-13",
+        "needsClarification": false,
+        "project": "HackRice"
+      },
+      {
+        "title": "Email Maya",
+        "type": "task",
+        "date": "2026-09-13T00:00:00.000Z",
+        "needsClarification": false,
+        "project": "Personal"
+      },
+      {
+        "title": "Dentist appointment",
+        "type": "event",
+        "date": "2026-09-15T20:00:00.000Z",
+        "needsClarification": false,
+        "project": "Personal"
+      }
+    ],
+    "sourceCount": 1,
+    "errors": [],
+    "input": "Generated speech fed through Chromium microphone capture, then real ElevenLabs API; not a physical microphone test.",
+    "goldenSteps": {
+      "syllabus": "4 dates, 1 lecture, 2 optional schedules; 5 calendar additions",
+      "calendarCompletion": "Board updated",
+      "mayaResults": 2,
+      "zeroSearch": "passed",
+      "pdfPreview": "rendered",
+      "ics": "downloaded and validated",
+      "errors": []
+    }
+  }
+]

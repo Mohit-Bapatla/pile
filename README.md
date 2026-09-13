@@ -2,7 +2,7 @@
 
 **A little less on your mind.** Pile turns a messy capture into the few things you need to do, remember or attend. It is an actionable information filter, not an exhaustive extractor.
 
-![Pile board](docs/screenshots/board.png)
+![Pile board](docs/screenshots/final-demo-board.png)
 
 Built for HackRice 16 with Next.js 16, React, TypeScript, PostgreSQL, ElevenLabs speech-to-text and optional Backboard memory. The warm paper board is the product; no chat dashboard or forced sponsor flows.
 
@@ -48,14 +48,14 @@ Stop `pnpm dev` before `pnpm start`; both use port 3001. Playwright can start th
 
 `DEMO_MODE=true` works without credentials. Text uses local rules; the exact sample flyer is recognized by SHA-256; arbitrary image understanding requires the OpenAI-compatible vision provider. The sample transcript is explicitly a demo shortcut. Real recordings use ElevenLabs independently of OpenAI.
 
-No sponsor credentials were available for this pass. Provider HTTP contracts are verified using mocks, not live accounts. Physical microphone speech was not manually verified; automated Chromium recording and injected audio cover the flow. Google events in demo mode are local demo events.
+ElevenLabs is configured in the local recording environment and live transcription was exercised using generated speech through Chromium recording. Physical microphone speech still needs a human check. Google, Backboard, and Tiger are not configured locally; their provider contracts use mocks. Google events in demo mode are local demo events.
 
 ## Environment
 
 | Variable               | Required? / purpose                                                                                                     |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `DEMO_MODE`            | Optional; defaults to true. False requires a text/vision provider for automatic parsing and Google for calendar writes. |
-| `DATA_DIR`             | Optional; embedded PGlite directory, default `.data/pile`.                                                              |
+| `DATA_DIR`             | Optional; embedded PGlite directory, default `.data/pile`; recording uses `.data/demo`.                                 |
 | `TIGER_DATABASE_URL`   | Optional; Tiger Data PostgreSQL connection. Takes precedence over `DATABASE_URL`.                                       |
 | `DATABASE_URL`         | Optional; any standard PostgreSQL connection. Otherwise PGlite persists locally.                                        |
 | `OPENAI_API_KEY`       | Optional; real text and image understanding.                                                                            |
@@ -86,11 +86,11 @@ PGlite and hosted PostgreSQL implement the same DB interface. Repeatable migrati
 
 ## Current demo kit
 
-- **Syllabus:** three-page fictional UGS 303 Fall 2026 course. Four assessment dates, Tuesday/Thursday class, optional office hours and tutoring. Lots of course prose stays as context. A repeated assessment date deduplicates.
+- **Syllabus:** four-page fictional UGS 303 Fall 2026 course. Four assessment dates, Tuesday/Thursday class, optional office hours and tutoring. Lots of course prose stays as context. A repeated assessment date deduplicates.
 - **Meeting notes:** original editorial notes with Maya and Jordan's two actions plus a Monday launch. Attendees and ordinary discussion are not cards.
 - **Flyer:** restrained Design Night poster, September 17, 2026 at 7 PM, Rice Architecture / Anderson Hall. End time is not invented in extraction; a one-hour calendar default applies when exporting an event without an explicit end.
 
-Regenerate with `pnpm fixtures`. Capture current screens with `pnpm screenshots` against the running app.
+Regenerate with `pnpm fixtures`. Capture QA screens with `pnpm qa:server` and `pnpm screenshots` on isolated port 3003. Never run destructive QA against the recording server.
 
 ## 90-second demo
 
@@ -105,6 +105,12 @@ Regenerate with `pnpm fixtures`. Capture current screens with `pnpm screenshots`
 
 Read the [final HackRice handoff](docs/FINAL_HACKRICE_HANDOFF.md), [adversarial QA log](docs/FINAL_QA.md), [complete external ChatGPT critique](docs/CHATGPT_CRITIQUE.md), [independent critique decisions](docs/CRITIQUE_DECISIONS.md), [design principles](docs/DESIGN.md), and [accessibility results](docs/ACCESSIBILITY_RESULTS.json). Previous handoffs are historical snapshots.
 
-Final local gate: **55 unit + 36 integration + 30 Chromium E2E = 121 passing functional tests**, plus lint, typecheck, production build, fresh migrations/seed and visual/accessibility checks. Real sponsor credentials and physical microphone speech remain unverified. A generated timed ICS event was manually imported into Apple Calendar and the isolated test calendar was cleaned up. The final handoff contains the precise evidence boundaries and release commit.
+Current release evidence and exact test totals are in [FINAL_DEMO_READY_HANDOFF.md](docs/FINAL_DEMO_READY_HANDOFF.md). Earlier handoffs and Apple Calendar import evidence are historical snapshots. Automated functional, extraction, production visual and live ElevenLabs checks have separate evidence files under `docs/qa/`.
 
-The local demo is not a multi-device account product. Browser-cookie sessions, no background external calendar reconciliation, limited deterministic document layouts, no scanned-PDF OCR, and no retained audio playback are intentional current limits. See the handoff for exact tests and provider verification boundaries.
+The local demo is not a multi-device account product. Browser-cookie sessions, no background external calendar reconciliation, limited deterministic document layouts, no scanned-PDF OCR, and session-only audio playback are intentional current limits. See the handoff for exact tests and provider verification boundaries.
+
+## Final demo correctness pass
+
+See [test isolation and guarded reset](docs/TEST_DATA_ISOLATION.md), [extraction evaluation](docs/qa/extraction-results.json), and [interaction matrix](docs/INTERACTION_MATRIX.md). Run `pnpm eval:extraction` for the versioned golden corpus. The final current results are in `docs/FINAL_DEMO_READY_HANDOFF.md`.
+
+For the prepared recording checkout, stop port 3001, run `pnpm demo:reset`, then `pnpm start`. The guarded command requires the recording identity marker and refuses remote databases. See [TEST_DATA_ISOLATION.md](docs/TEST_DATA_ISOLATION.md) before first-time setup. Automated tests use port 3002 with a temporary database; manual QA uses port 3003.

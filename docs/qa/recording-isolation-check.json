@@ -1,0 +1,8 @@
+{
+  "database": ".data/demo",
+  "method": "SHA-256 of sorted relative file paths, NUL separators, and file contents; recording server stopped",
+  "files": 1027,
+  "digest": "ced984f5d597f2c79ea87757f9e048d370487afce491536fbf8d89243028fd2f",
+  "beforeDigest": "ced984f5d597f2c79ea87757f9e048d370487afce491536fbf8d89243028fd2f",
+  "unchanged": true
+}

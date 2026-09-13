@@ -1680,6 +1680,23 @@ main {
   background: #aa7253;
   animation: wave 750ms ease-in-out infinite alternate;
 }
+.input-waveform i {
+  transition: height 100ms linear;
+}
+.recording-preview {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+  margin: 16px 0;
+}
+.recording-preview audio {
+  width: 100%;
+}
+.recording-preview p,
+.voice-panel [role='meter'] {
+  font-size: 12px;
+  color: var(--muted);
+}
 .recording-time {
   font-size: 22px;
   font-variant-numeric: tabular-nums;
@@ -2813,4 +2830,39 @@ main {
     display: flex;
     align-items: center;
   }
+}
+
+.calendar-open {
+  background: none;
+  border: 0;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+  display: flex;
+  gap: 5px;
+  align-items: start;
+  width: 100%;
+}
+.calendar-complete {
+  border: 1px solid currentColor;
+  background: transparent;
+  border-radius: 50%;
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 5px;
+}
+.calendar-event.is-complete {
+  opacity: 0.55;
+}
+.calendar-event.is-complete strong {
+  text-decoration: line-through;
+}
+
+.calendar-complete[aria-pressed='false'] svg {
+  opacity: 0;
+}
+.calendar-complete[aria-pressed='false']:hover svg {
+  opacity: 0.5;
 }

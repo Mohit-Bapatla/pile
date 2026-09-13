@@ -82,6 +82,8 @@ test('requested search corpus stays filtered and exact item title ranks first', 
       'Email Maya tomorrow; chemistry homework due Sunday; dentist Tuesday 3pm at West Campus Dental; email internship recruiter Friday',
     );
   await page.getByRole('button', { name: 'Sort my pile' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button', { name: 'Close dialog' }).click();
   await expect(page.getByRole('heading', { name: 'Email Maya', exact: true })).toBeVisible();
   for (const query of [
     'Maya',
@@ -139,7 +141,7 @@ test('review shows real evidence and search distinguishes items from original so
 }) => {
   await page.getByRole('button', { name: 'Try a syllabus' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByText('3-page source', { exact: false })).toBeVisible();
+  await expect(dialog.getByText('4-page source', { exact: false })).toBeVisible();
   await dialog.getByText('Why this item?', { exact: true }).first().click();
   await expect(dialog.locator('blockquote').first()).toContainText('Meetings:');
   await expect(dialog.getByRole('button', { name: 'Download calendar file (.ics)' })).toBeVisible();

@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "application",
+  "category": "application instructions",
+  "text": "Application instructions\nSubmit the application by October 15\nUpload my resume tomorrow\nApplicants should have two years of experience.",
+  "expected": [
+    {
+      "title": "Submit application",
+      "type": "deadline",
+      "date": "2026-10-15"
+    },
+    {
+      "title": "Upload resume",
+      "type": "task",
+      "date": "2026-09-13"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

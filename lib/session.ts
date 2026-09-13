@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { randomBytes, createHash } from 'node:crypto';
 import type { DB } from './db';
-import { seed } from './store';
+import { seed, seedRecording } from './store';
 export async function session(db: DB) {
   const jar = await cookies();
   let token = jar.get('pile_session')?.value;
@@ -22,6 +22,7 @@ export async function session(db: DB) {
     maxAge: 60 * 60 * 24 * 90,
     path: '/',
   });
-  if (process.env.DEMO_MODE !== 'false') await seed(db, id);
+  if (process.env.DEMO_MODE !== 'false')
+    await (process.env.PILE_WORKSPACE_MODE === 'recording' ? seedRecording : seed)(db, id);
   return id;
 }

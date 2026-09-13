@@ -1,0 +1,28 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "club",
+  "category": "club announcement",
+  "text": "Club meeting Thursday at 6 PM in Student Center\nEmail Maya tomorrow to RSVP",
+  "expected": [
+    {
+      "title": "Club meeting",
+      "type": "event",
+      "date": "2026-09-17T23:00:00.000Z"
+    },
+    {
+      "title": "Email Maya to RSVP",
+      "type": "task",
+      "date": "2026-09-13"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}

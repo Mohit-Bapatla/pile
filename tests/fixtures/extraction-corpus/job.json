@@ -1,0 +1,23 @@
+{
+  "now": "2026-09-12T17:00:00Z",
+  "timezone": "America/Chicago",
+  "id": "job",
+  "category": "job posting",
+  "text": "Software Engineering Internship\nQualifications: three years of experience\nCandidates should know Python and SQL.\nApplication deadline October 15",
+  "expected": [
+    {
+      "title": "Application deadline",
+      "type": "deadline",
+      "date": "2026-10-15"
+    }
+  ],
+  "optional": [],
+  "forbidden": [
+    "By via Canvas",
+    "request is submitted",
+    "We aim to respond",
+    "Late work may",
+    "grade is based",
+    "years of experience"
+  ]
+}
