@@ -36,12 +36,14 @@ export function lexicalSearch(
   const yesterday = tokens.includes('yesterday');
   tokens = tokens.filter((t) => t !== 'yesterday');
   const sourceMap = new Map(sources.map((s) => [s.id, s]));
-  const yesterdayDate = new Intl.DateTimeFormat('en-CA', {
+  const localToday = new Intl.DateTimeFormat('en-CA', {
     timeZone: timezone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).format(new Date(now.getTime() - 86400000));
+  }).format(now);
+  // Calendar arithmetic, not a 24-hour instant subtraction across a DST day.
+  const yesterdayDate = new Date(Date.parse(localToday) - 86400000).toISOString().slice(0, 10);
   const recent = (source?: Source) =>
     !yesterday ||
     (!!source &&

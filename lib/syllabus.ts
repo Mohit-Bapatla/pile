@@ -56,7 +56,9 @@ export function parseSyllabus(
     termEnd,
   };
   const items: ExtractedItem[] = [];
+  let assessmentTable = false;
   for (const line of lines) {
+    if (/assignment.*(?:due|date)|assessment.*date/i.test(line)) assessmentTable = true;
     const schedule = /^(meetings|class schedule|discussion|lab|office hours|tutoring)\b/i.test(
       line,
     );
@@ -119,17 +121,24 @@ export function parseSyllabus(
       });
       continue;
     }
+    const scheduleChange = /\b(no class|cancelled|canceled|rescheduled|moved to)\b/i.test(line);
     // Assessment rows must carry both a date and an explicit assessment/action signal.
     if (
-      !/\b(due|deadline|exam|midterm|quiz|proposal|final project|assignment|registration|payment|cancelled)\b/i.test(
+      (!/\b(due|deadline|exam|midterm|quiz|proposal|final project|assignment|registration|payment|cancelled)\b/i.test(
         line,
-      ) ||
+      ) &&
+        !scheduleChange &&
+        !(assessmentTable && /[|\t]/.test(line))) ||
       line.length > 240
     )
       continue;
     const d = resolve(line, datedContext);
     if (!d.date) continue;
-    const type = /\b(exam|midterm|quiz)\b/i.test(line) ? 'event' : 'deadline';
+    const type = scheduleChange
+      ? 'reminder'
+      : /\b(exam|midterm|quiz)\b/i.test(line)
+        ? 'event'
+        : 'deadline';
     const title = line
       .replace(d.matched || '', '')
       .replace(/^\s*[|:—–-]+|[|:—–-]+\s*$/g, '')
@@ -143,8 +152,15 @@ export function parseSyllabus(
       project,
       tier: 'important',
       priority: /exam|midterm|final/i.test(line) ? 'high' : 'medium',
-      confidence: 0.95,
-      needsClarification: false,
+      confidence: d.ambiguous || scheduleChange ? 0.6 : 0.95,
+      needsClarification: !!d.ambiguous || scheduleChange,
+      ...(d.ambiguous || scheduleChange
+        ? {
+            clarificationQuestion: scheduleChange
+              ? 'Schedule change: confirm this date and adjust the recurring class in your calendar.'
+              : 'The source gives more than one date. Which should be used?',
+          }
+        : {}),
       allDay: !d.hasTime,
       sourceTimezone: context.timezone,
       ...(type === 'event' ? { startDateTime: d.date } : { dueDate: d.date }),

@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-13T00:12:43.951Z",
+  "mode": "Production, external browser requests blocked, providers absent",
+  "durations": [
+    {
+      "seconds": 2,
+      "recorded": true,
+      "fallback": true
+    },
+    {
+      "seconds": 20,
+      "recorded": true,
+      "fallback": true
+    }
+  ],
+  "flows": [
+    "recording",
+    "sample transcript",
+    "capture",
+    "syllabus",
+    "demo calendar",
+    "flyer",
+    "all routes",
+    "search",
+    "zero results"
+  ],
+  "errors": [],
+  "resources": [
+    {
+      "name": "turbopack-1whhmegzaiubn.js",
+      "bytes": 4587
+    },
+    {
+      "name": "3kpcl2ujsmeo7.js",
+      "bytes": 3968
+    },
+    {
+      "name": "41045dk4l24f1.js",
+      "bytes": 47382
+    },
+    {
+      "name": "0kek-vcqoe6ys.js",
+      "bytes": 71887
+    },
+    {
+      "name": "3gykz5dhjojjv.js",
+      "bytes": 138285
+    }
+  ]
+}

@@ -111,7 +111,7 @@ await page.getByRole('heading', { name: /Email Maya/ }).waitFor();
 await page.getByLabel('Search your pile').blur();
 await shot('search');
 await page.getByLabel('Search your pile').fill('zzmissingneedle');
-await page.getByText('0 matches', { exact: true }).waitFor();
+await page.getByText('0 items · 0 sources', { exact: true }).waitFor();
 await shot('empty');
 await audit('empty search');
 await page.goto('http://127.0.0.1:3001/app/projects');

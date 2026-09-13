@@ -48,7 +48,7 @@ test('selective syllabus review edits in place, exports valid ICS, and rejects d
   await dialog.getByRole('button', { name: 'Select all important' }).click();
   await expect(dialog.getByRole('button', { name: 'Add 6 to calendar' })).toBeEnabled();
   const downloadPromise = page.waitForEvent('download');
-  await dialog.getByRole('button', { name: 'Add to Apple Calendar · .ics' }).click();
+  await dialog.getByRole('button', { name: 'Download calendar file (.ics)' }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe('Pile-UGS303.ics');
   const ics = await readFile((await download.path())!, 'utf8');

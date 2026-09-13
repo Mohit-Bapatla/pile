@@ -32,17 +32,16 @@ export function actionability(item: ExtractedItem) {
   if (item.type === 'note' && /remember|prefer|when i say|save this/i.test(text)) score += 55;
   return Math.min(100, score);
 }
-export function filterExtraction(extraction: Extraction, document: boolean): Extraction {
+export function filterExtraction(extraction: Extraction, _document: boolean): Extraction {
+  void _document;
   const seen = new Set<string>();
   const items = extraction.items
     .filter((i) => {
       const key = candidateKey(i);
       if (seen.has(key)) return false;
       seen.add(key);
-      // A short intentional note is retained; document prose is not turned into cards.
-      return (
-        actionability(i) >= 40 || (!document && extraction.items.length === 1 && i.type === 'note')
-      );
+      // Explicit actions/preferences qualify; generic prose remains in the source.
+      return actionability(i) >= 40;
     })
     .map((i) => {
       const score = actionability(i);
@@ -66,6 +65,20 @@ export function filterExtraction(extraction: Extraction, document: boolean): Ext
           : {}),
       };
     });
+  // Conflicting dates are alternatives to resolve, never two confidently scheduled commitments.
+  for (const item of items) {
+    const conflicts = items.filter(
+      (other) =>
+        normalizedTitle(other.title) === normalizedTitle(item.title) &&
+        (other.dueDate || other.startDateTime) !== (item.dueDate || item.startDateTime),
+    );
+    if (conflicts.length) {
+      item.needsClarification = true;
+      item.confidence = 0.6;
+      item.clarificationQuestion =
+        'The source gives different dates for this item. Which date is correct?';
+    }
+  }
   return {
     ...extraction,
     items,

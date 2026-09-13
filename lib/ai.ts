@@ -13,7 +13,8 @@ export interface AIProvider {
 export function inferProject(text: string, existing: string[] = []) {
   const known = existing.find((p) => text.toLowerCase().includes(p.toLowerCase()));
   if (known) return known;
-  if (/calc|probability|math/i.test(text)) return 'Calculus';
+  if (/probability|\bprob\b/i.test(text)) return 'Probability';
+  if (/calc|math/i.test(text)) return 'Calculus';
   if (/hackrice/i.test(text)) return 'HackRice';
   if (/resume|résumé|recruiter|internship/i.test(text)) return 'Job Search';
   if (/chemistry|physics/i.test(text)) return /chemistry/i.test(text) ? 'Chemistry' : 'Physics';
@@ -42,11 +43,12 @@ export function resolveDate(text: string, context: ParseContext) {
     /\bat (one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/gi,
     (_, word) => 'at ' + spokenHours[word.toLowerCase()],
   );
-  const parsed = chrono.parse(
+  const matches = chrono.parse(
     normalized,
     { instant: wallClock, timezone: 0 },
     { forwardDate: true },
-  )[0];
+  );
+  const parsed = matches[0];
   if (!parsed) return {};
   const c = parsed.start;
   const day = `${c.get('year')}-${String(c.get('month')).padStart(2, '0')}-${String(c.get('day')).padStart(2, '0')}`;
@@ -57,6 +59,14 @@ export function resolveDate(text: string, context: ParseContext) {
     date: hasTime ? fromZonedTime(local, context.timezone).toISOString() : day,
     hasTime,
     matched: parsed.text,
+    ambiguous: matches.length > 1 || (!!parsed.end && parsed.end.get('day') !== c.get('day')),
+    end:
+      parsed.end && hasTime && parsed.end.get('day') === c.get('day')
+        ? fromZonedTime(
+            `${day}T${String(parsed.end.get('hour')).padStart(2, '0')}:${String(parsed.end.get('minute') || 0).padStart(2, '0')}:00`,
+            context.timezone,
+          ).toISOString()
+        : undefined,
   };
 }
 export class MockAIProvider implements AIProvider {
@@ -84,7 +94,7 @@ export class MockAIProvider implements AIProvider {
       );
     const syllabus = parseSyllabus(text, context, resolveDate);
     if (syllabus) return syllabus;
-    const document = text.split(/\n/).length > 5;
+    const document = text.split(/\n/).length > 5 || text.length > 1500;
     const clauses = text
       .split(
         /\n+|;|,(?!\s*\d{4})|\s+and\s+(?=(?:I |my |remind|need|email|call|finish|submit|dentist|chemistry|physics|send|pick|we |the ))/i,
@@ -100,7 +110,10 @@ export class MockAIProvider implements AIProvider {
             clause,
           ),
       )
-      .map((clause) => {
+      .map((originalClause) => {
+        const clause = originalClause
+          .replace(/\bemial\b/gi, 'email')
+          .replace(/\btomorow\b/gi, 'tomorrow');
         const d = resolveDate(clause, context);
         const type: ExtractedItem['type'] = /\bidea\b|what if|browser extension/i.test(clause)
           ? 'idea'
@@ -120,6 +133,7 @@ export class MockAIProvider implements AIProvider {
                     ? 'reference'
                     : 'note';
         const ambiguous =
+          !!d.ambiguous ||
           (/\bat (?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b/i.test(
             clause,
           ) &&
@@ -128,6 +142,13 @@ export class MockAIProvider implements AIProvider {
           (/\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/i.test(clause) &&
             !d.date) ||
           /\b(?:on|by|due)\s+\d{1,2}\/\d{1,2}\b/.test(clause);
+        const location =
+          type === 'event'
+            ? clause
+                .replace(d.matched || '', '')
+                .match(/\b(?:at|in)\s+([a-z][^.!?]*)$/i)?.[1]
+                ?.trim()
+            : undefined;
         let title = clause
           .replace(
             /^(?:I (?:have|need to|should probably)|need to|remind me to|I had an idea for|idea:)\s*/i,
@@ -139,21 +160,36 @@ export class MockAIProvider implements AIProvider {
             .replace(d.matched, '')
             .replace(/\s+(?:by|on|at|is)\s*$/, '')
             .trim();
+        if (location)
+          title = title
+            .replace(
+              new RegExp(
+                '\\b(?:at|in)\\s+' + location.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$',
+                'i',
+              ),
+              '',
+            )
+            .trim();
+        title = title
+          .replace(/\s+/g, ' ')
+          .replace(/\b(?:due|by|on)\s*$/i, '')
+          .trim();
         title = title.charAt(0).toUpperCase() + title.slice(1);
         return {
           type,
           title: title.slice(0, 240) || clause.slice(0, 240),
-          description: clause,
-          evidence: clause,
+          description: originalClause.slice(0, 5000),
+          evidence: originalClause.slice(0, 1500),
+          location,
           sourceTimezone: context.timezone,
           priority: /exam|midterm|final|urgent|deadline/i.test(clause) ? 'high' : 'medium',
           confidence: ambiguous ? 0.65 : type === 'note' ? 0.8 : 0.91,
           project: inferProject(clause, context.projects),
           needsClarification: ambiguous,
           ...(ambiguous ? { clarificationQuestion: 'What exact date or time did you mean?' } : {}),
-          ...(d.date && type !== 'idea'
+          ...(d.date && !['idea', 'note', 'reference'].includes(type)
             ? type === 'event'
-              ? { startDateTime: d.date, allDay: !d.hasTime }
+              ? { startDateTime: d.date, endDateTime: d.end, allDay: !d.hasTime }
               : { dueDate: d.date, allDay: !d.hasTime }
             : {}),
         };
@@ -297,7 +333,10 @@ export class ElevenLabsTranscriptionProvider implements TranscriptionProvider {
           ? 'ElevenLabs could not authenticate. Check the server API key.'
           : 'ElevenLabs could not transcribe this recording. Please retry.',
       );
-    return z.object({ text: z.string().trim().min(1) }).parse(await response.json()).text;
+    const result = z.object({ text: z.string() }).safeParse(await response.json());
+    if (!result.success || !result.data.text.trim())
+      throw new Error('No speech was detected. Try recording again or type your transcript.');
+    return result.data.text.trim();
   }
 }
 export const DEMO_TRANSCRIPT =

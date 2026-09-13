@@ -141,7 +141,7 @@ describe('real persistence and capture pipeline', () => {
     expect(found.items.some((i) => i.title.includes('Maya'))).toBe(true);
   });
   it('enforces source and item ownership', async () => {
-    const { source, items } = await capture('Private information');
+    const { source, items } = await capture('Email private information to Maya');
     expect(await getSource(db, 'other-user', source.id)).toBeUndefined();
     expect(await getItem(db, 'other-user', items[0].id)).toBeUndefined();
   });
@@ -325,5 +325,144 @@ describe('provider request contracts and persistent preferences', () => {
     expect(items.some((i) => /Maya/.test(i.title))).toBe(true);
     expect(items.some((i) => /Jordan/.test(i.title))).toBe(true);
     expect(items.some((i) => /Attendees|onboarding|Notes/.test(i.title))).toBe(false);
+  });
+});
+
+describe('prejudge corpus, failure and provider paths', () => {
+  it('extracts an alternate actual PDF and flags conflicting assessment rows', async () => {
+    const bytes = await readFile('tests/fixtures/alternate-syllabus.pdf');
+    const { items } = await capture('', 'pdf', bytes, 'application/pdf');
+    expect(items).toHaveLength(6);
+    expect(items.filter((i) => i.title === 'Essay')).toHaveLength(2);
+    expect(items.filter((i) => i.title === 'Essay').every((i) => i.needsClarification)).toBe(true);
+    expect(items.some((i) => /instructor|overview|Dr Example/i.test(i.title))).toBe(false);
+    expect(items.find((i) => i.title.startsWith('No class'))?.needsClarification).toBe(true);
+  });
+  it('preserves a prose-only PDF with zero actionable cards', async () => {
+    const bytes = await readFile('tests/fixtures/reference-only.pdf');
+    const { source, items } = await capture('', 'pdf', bytes, 'application/pdf');
+    expect(items).toHaveLength(0);
+    expect((await getSource(db, user, source.id))?.body.rawText).toContain('community gardens');
+  });
+  it('rejects an image-only PDF with a useful recovery message', async () => {
+    await expect(pdfText(await readFile('tests/fixtures/image-only.pdf'))).rejects.toThrow(
+      /no readable text/,
+    );
+  });
+  it('recovers text parsing locally when a configured AI request fails', async () => {
+    vi.stubEnv('OPENAI_API_KEY', 'test-key');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('', { status: 503 })),
+    );
+    const { source, items } = await capture('Email Maya tomorrow');
+    expect(items[0].title).toBe('Email Maya');
+    expect((await getSource(db, user, source.id))?.body.provider).toContain('fallback');
+  });
+  it('keeps a long original and commits bounded extracted fields', async () => {
+    const text = 'Email Maya about ' + 'our project '.repeat(800);
+    const { source, items } = await capture(text);
+    expect(items).toHaveLength(1);
+    expect((await getSource(db, user, source.id))?.body.rawText).toBe(text);
+  });
+  it('rolls back a failed PostgreSQL transaction', async () => {
+    const id = crypto.randomUUID();
+    await expect(
+      db.transaction(async (tx) => {
+        await tx.query('INSERT INTO users(id,session_hash) VALUES($1,$2)', [id, id]);
+        throw new Error('deliberate rollback');
+      }),
+    ).rejects.toThrow('deliberate rollback');
+    expect((await db.query('SELECT id FROM users WHERE id=$1', [id])).rows).toHaveLength(0);
+  });
+  it.each(['audio/mp4', 'audio/webm;codecs=opus'])(
+    'sends browser audio format %s without converting bytes',
+    async (mime) => {
+      vi.stubEnv('ELEVENLABS_API_KEY', 'test-key');
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (_url, init) => {
+          expect((init.body as FormData).get('file')).toBeInstanceOf(File);
+          expect((init.body as FormData).get('model_id')).toBe('scribe_v2');
+          return Response.json({ text: 'Email Maya tomorrow' });
+        }),
+      );
+      expect(
+        await new ElevenLabsTranscriptionProvider().transcribe(
+          new File(['recorded bytes'], 'voice', { type: mime }),
+        ),
+      ).toBe('Email Maya tomorrow');
+    },
+  );
+  it('handles silent transcription and network errors without invented text', async () => {
+    vi.stubEnv('ELEVENLABS_API_KEY', 'test-key');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ text: '  ' })),
+    );
+    const audio = new File(['bytes'], 'voice.webm', { type: 'audio/webm' });
+    await expect(new ElevenLabsTranscriptionProvider().transcribe(audio)).rejects.toThrow(
+      /No speech/,
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('Network unavailable');
+      }),
+    );
+    await expect(new ElevenLabsTranscriptionProvider().transcribe(audio)).rejects.toThrow(
+      /Network/,
+    );
+  });
+  it('Google refreshes, lists writable calendars, handles duplicate create and deleted events', async () => {
+    vi.stubEnv('TOKEN_ENCRYPTION_KEY', 'test-encryption-key-at-least-32-characters');
+    await saveTokens(db, user, {
+      access_token: 'expired-test-token',
+      refresh_token: 'refresh-test-token',
+      expires_at: 0,
+    });
+    const { items } = await capture('Dentist September 15, 2026 at 3 PM');
+    const calls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url, init) => {
+        calls.push(String(url));
+        if (String(url).includes('oauth2.googleapis.com'))
+          return Response.json({ access_token: 'fresh-test-token', expires_in: 3600 });
+        if (String(url).includes('calendarList'))
+          return Response.json({ items: [{ id: 'test@calendar', summary: 'QA calendar' }] });
+        if (init.method === 'POST') return new Response('', { status: 409 });
+        if (init.method === 'DELETE') return new Response('', { status: 410 });
+        return Response.json({ items: [] });
+      }),
+    );
+    const adapter = new GoogleCalendarAdapter(db, user, 'test@calendar');
+    expect(await adapter.calendars()).toEqual([{ id: 'test@calendar', name: 'QA calendar' }]);
+    expect(await adapter.list()).toEqual([]);
+    expect((await adapter.create(items[0])).id).toContain('pile');
+    await adapter.remove('test-event');
+    expect(calls.filter((url) => url.includes('oauth2.googleapis.com'))).toHaveLength(1);
+    await db.query('DELETE FROM oauth_tokens WHERE user_id=$1', [user]);
+  });
+  it.each([401, 412, 503])('Google errors %i fail visibly', async (status) => {
+    vi.stubEnv('TOKEN_ENCRYPTION_KEY', 'test-encryption-key-at-least-32-characters');
+    await saveTokens(db, user, { access_token: 'test-token', expires_at: Date.now() + 3600000 });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('', { status })),
+    );
+    await expect(new GoogleCalendarAdapter(db, user).list()).rejects.toThrow(
+      status === 401 ? /Reconnect/ : status === 412 ? /changed/ : /retry/,
+    );
+    await db.query('DELETE FROM oauth_tokens WHERE user_id=$1', [user]);
+  });
+  it('Backboard delete uses the owned assistant memory endpoint', async () => {
+    const mock = vi.fn(async () => new Response(null, { status: 204 }));
+    vi.stubGlobal('fetch', mock);
+    await new BackboardMemoryAdapter('qa-assistant').forget('qa-memory');
+    expect(mock).toHaveBeenCalledWith(
+      expect.stringContaining('/assistants/qa-assistant/memories/qa-memory'),
+      expect.objectContaining({ method: 'DELETE' }),
+    );
   });
 });

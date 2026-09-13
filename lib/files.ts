@@ -8,7 +8,7 @@ export async function pdfText(bytes: Buffer) {
   const parser = new PDFParse({ data: new Uint8Array(bytes) });
   try {
     const result = await parser.getText();
-    if (!result.text.trim())
+    if (!result.pages.some((page) => page.text.trim()))
       throw new Error('This PDF has no readable text. Try a text-based PDF or paste its contents.');
     return result.text.slice(0, 60000);
   } finally {

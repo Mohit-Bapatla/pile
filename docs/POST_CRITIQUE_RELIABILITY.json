@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-13T00:21:31.199Z",
+  "mode": "Production; browser external requests blocked; server provider credentials absent",
+  "flows": [
+    "typed capture with location",
+    "syllabus and exact evidence",
+    "explicit approval of five demo calendar events",
+    "flyer review",
+    "six routes at eight widths",
+    "item/source search",
+    "zero results",
+    "edited sample transcript"
+  ],
+  "widths": [
+    1440,
+    1280,
+    1100,
+    900,
+    768,
+    600,
+    390,
+    1512
+  ],
+  "errors": [],
+  "overflow": [],
+  "blockedOrigins": [],
+  "resources": [
+    {
+      "name": "41045dk4l24f1.js",
+      "bytes": 47382
+    },
+    {
+      "name": "0kek-vcqoe6ys.js",
+      "bytes": 71887
+    },
+    {
+      "name": "turbopack-1whhmegzaiubn.js",
+      "bytes": 4587
+    },
+    {
+      "name": "3kpcl2ujsmeo7.js",
+      "bytes": 3968
+    },
+    {
+      "name": "25nj4qqpx0yyw.js",
+      "bytes": 138804
+    }
+  ]
+}

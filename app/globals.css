@@ -2762,3 +2762,55 @@ main {
 .review-group h3 {
   color: #5c5a52;
 }
+
+/* Pre-judge clarity: evidence stays optional and content keeps its hierarchy. */
+.today-summary {
+  display: block;
+  margin-top: 3px;
+}
+.review-provenance,
+.calendar-legend,
+.search-mode {
+  color: #5c5a52;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.review-provenance {
+  margin: 0 0 12px;
+}
+.calendar-legend {
+  margin: -8px 0 20px;
+}
+.search-mode {
+  margin-top: -8px;
+}
+.search-group-title {
+  margin: 22px 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.item-evidence {
+  margin-top: 7px;
+  color: #5c5a52;
+  font-size: 12px;
+}
+.item-evidence summary {
+  cursor: pointer;
+  width: fit-content;
+  padding: 4px 0;
+}
+.item-evidence blockquote {
+  margin: 6px 0;
+  padding: 8px 12px;
+  border-left: 2px solid #a6a18e;
+  background: #f3efe6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .item-evidence summary {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+}

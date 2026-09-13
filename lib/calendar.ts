@@ -18,6 +18,12 @@ export function eventFromItem(item: Item, demo: boolean): CalendarEvent {
     throw new Error('Resolve the question before adding this item to your calendar.');
   if (item.recurrence) recurrenceRule(item);
   const allDay = item.allDay || start.length === 10;
+  if (
+    item.endDateTime &&
+    (Date.parse(item.endDateTime) <= Date.parse(start) ||
+      (item.endDateTime.length === 10) !== (start.length === 10))
+  )
+    throw new Error('Choose an end after the start, using the same date or time format.');
   return {
     id: calendarId(item.id, item.calendarRevision),
     itemId: item.id,

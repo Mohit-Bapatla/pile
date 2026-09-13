@@ -325,3 +325,143 @@ it('searches item-specific excerpts while ignoring the legacy shared prefix', ()
     item.id,
   ]);
 });
+
+describe('prejudge adversarial capture and calendars', () => {
+  const parser = new MockAIProvider();
+  it.each([
+    ['email maya tomorrow', 'task', 'Email maya'],
+    ['emial maya tomorow', 'task', 'Email maya'],
+    ['📧 email maya tomorrow!!!', 'task', '📧 email maya !!!'],
+  ])('handles short capture %s', async (text, type, title) => {
+    const r = await parser.parseText(text, context);
+    expect(r.items).toHaveLength(1);
+    expect(r.items[0]).toMatchObject({ type, title, dueDate: '2026-09-12' });
+  });
+  it('extracts a location and keeps a clean appointment title', async () => {
+    const r = await parser.parseText('dentist tuesday 3pm at west campus dental', context);
+    expect(r.items[0]).toMatchObject({
+      title: 'Dentist',
+      location: 'west campus dental',
+      startDateTime: '2026-09-15T20:00:00.000Z',
+    });
+  });
+  it('separates a firm deadline from a vague reminder', async () => {
+    const r = await parser.parseText(
+      'prob hw due sunday and call mom maybe sometime this weekend',
+      context,
+    );
+    expect(r.items).toHaveLength(2);
+    expect(r.items[0]).toMatchObject({
+      type: 'deadline',
+      project: 'Probability',
+      needsClarification: false,
+    });
+    expect(r.items[1].needsClarification).toBe(true);
+  });
+  it.each([
+    'random thought: plants are cool',
+    'I think I should maybe look into grad school but not now',
+  ])('keeps non-actionable source text without a board card: %s', async (text) => {
+    expect((await parser.parseText(text, context)).items).toHaveLength(0);
+  });
+  it('preserves a deliberate preference note', async () => {
+    expect((await parser.parseText('I prefer morning meetings', context)).items[0].type).toBe(
+      'note',
+    );
+  });
+  it('requires review when one clause has conflicting dates', async () => {
+    const r = await parser.parseText('Submit essay due September 18 or September 20', context);
+    expect(r.items[0].needsClarification).toBe(true);
+    expect(() => eventFromItem(toItem(r.items[0], source), false)).toThrow(/Resolve/);
+  });
+  it('deduplicates within a dump and flags conflicting copies', async () => {
+    const same = await parser.parseText('email Maya tomorrow; email Maya tomorrow', context);
+    expect(same.items).toHaveLength(1);
+    const conflict = await parser.parseText(
+      'Submit essay September 18; Submit essay September 20',
+      context,
+    );
+    expect(conflict.items).toHaveLength(2);
+    expect(conflict.items.every((i) => i.needsClarification)).toBe(true);
+  });
+  it('bounds long evidence without losing the original source or failing validation', async () => {
+    const r = await parser.parseText('Email Maya about ' + 'the project '.repeat(900), context);
+    expect(r.items[0].evidence!.length).toBeLessThanOrEqual(1500);
+    expect(r.items[0].description!.length).toBeLessThanOrEqual(5000);
+    expect(extractionSchema.safeParse(r).success).toBe(true);
+  });
+  it('retains explicit event time ranges', async () => {
+    const r = await parser.parseText('Meeting September 18 from 2pm to 3pm at Library', context);
+    expect(r.items[0].endDateTime).toBe('2026-09-18T20:00:00.000Z');
+  });
+  it('handles a second syllabus table and flags exceptions and conflicting dates', async () => {
+    const r = await parser.parseText(
+      'Course syllabus\nCS 101: Computing\nInstructor: Dr Example\nTerm: August 24 - December 10, 2026\nMeetings: Mon/Wed 11:00 AM - 12:15 PM in Room 101\nAssignment | Due date\nEssay | September 18, 2026\nMidterm | October 14, 2026\nNo class November 2, 2026\nEssay due September 20, 2026\nCourse overview\nWe value curiosity.',
+      context,
+    );
+    expect(r.items).toHaveLength(5);
+    expect(r.items.filter((i) => i.title === 'Essay').every((i) => i.needsClarification)).toBe(
+      true,
+    );
+    expect(r.items.find((i) => i.title.startsWith('No class'))?.needsClarification).toBe(true);
+    expect(r.items.find((i) => i.recurrence)?.endDateTime).toBe('2026-08-24T17:15:00.000Z');
+  });
+  it.each([
+    'America/Chicago',
+    'America/New_York',
+    'America/Los_Angeles',
+    'Europe/London',
+    'Asia/Tokyo',
+  ])('uses local relative dates and stable all-day values in %s', async (timezone) => {
+    const now = new Date('2026-09-12T02:30:00Z');
+    const local = localDate(now, timezone);
+    const tomorrow = new Date(Date.parse(local) + 86400000).toISOString().slice(0, 10);
+    const r = await parser.parseText('Email Maya tomorrow', { ...context, now, timezone });
+    expect(r.items[0].dueDate).toBe(tomorrow);
+    expect(itemDay(r.items[0].dueDate!, timezone)).toBe(tomorrow);
+    const timed = resolveDate('September 18 at 3pm', { ...context, timezone });
+    expect(formatInTimeZone(timed.date!, timezone, 'HH:mm')).toBe('15:00');
+  });
+  it('rejects backwards ends and a recurrence ending before its start', () => {
+    const item = toItem(
+      {
+        ...extracted,
+        type: 'event',
+        startDateTime: '2026-09-18T20:00:00Z',
+        endDateTime: '2026-09-18T19:00:00Z',
+      },
+      source,
+    );
+    expect(() => eventFromItem(item, false)).toThrow(/end after/);
+    delete item.endDateTime;
+    item.recurrence = { days: ['FR'], until: '2026-09-01', timezone: 'America/Chicago' };
+    expect(() => eventFromItem(item, false)).toThrow(/term end/);
+  });
+});
+it('yesterday uses the prior calendar day at the end of a 25-hour DST day', () => {
+  const src = { ...source, rawText: 'Maya', createdAt: '2026-10-31T17:00:00Z' };
+  expect(
+    lexicalSearch('Maya yesterday', [], [src], new Date('2026-11-02T05:30:00Z'), 'America/Chicago')
+      .sources,
+  ).toHaveLength(1);
+});
+it('all-day recurring occurrences retain date-only values across display zones', () => {
+  const result = calendarOccurrences(
+    [
+      {
+        id: 'qa',
+        title: 'Monday',
+        start: '2026-09-14',
+        end: '2026-09-15',
+        allDay: true,
+        demo: true,
+        recurrence: { days: ['MO'], until: '2026-10-01', timezone: 'America/Chicago' },
+      },
+    ],
+    '2026-09-12',
+    '2026-09-19',
+  );
+  expect(result[0]).toMatchObject({ start: '2026-09-14', end: '2026-09-15' });
+  for (const zone of ['Asia/Tokyo', 'America/Los_Angeles'])
+    expect(itemDay(result[0].start, zone)).toBe('2026-09-14');
+});

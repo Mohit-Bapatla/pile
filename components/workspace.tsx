@@ -190,6 +190,7 @@ export default function Workspace({ view }: { view: string[] }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Item[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchProvider, setSearchProvider] = useState('Local search');
   const [sourceResults, setSourceResults] = useState<Source[]>([]);
   const [showDone, setShowDone] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -241,6 +242,7 @@ export default function Workspace({ view }: { view: string[] }) {
         if (!r.ok) throw new Error(found.error);
         setResults(found.items);
         setSourceResults(found.sources || []);
+        setSearchProvider(found.provider || 'Local search');
         setSearching(false);
       } catch (e) {
         if (!controller.signal.aborted) {
@@ -597,11 +599,15 @@ export default function Workspace({ view }: { view: string[] }) {
               <p>
                 {page === 'board' ? (
                   <>
-                    You’ve got{' '}
-                    <strong>
-                      {active.filter((i) => section(i, today, timezone) === 'Today').length} things
-                    </strong>{' '}
-                    for today. One thing at a time.
+                    Drop a thought or file. Keep the actions, leave the noise.
+                    <span className="today-summary">
+                      You’ve got{' '}
+                      <strong>
+                        {active.filter((i) => section(i, today, timezone) === 'Today').length}{' '}
+                        things
+                      </strong>{' '}
+                      for today. One thing at a time.
+                    </span>
                   </>
                 ) : page === 'inbox' ? (
                   'The original thoughts, files, and moments behind your plan.'
@@ -1036,6 +1042,9 @@ export default function Workspace({ view }: { view: string[] }) {
                       </button>
                     </div>
                   </div>
+                  <p className="calendar-legend">
+                    Solid cards: calendar events · Dashed cards: suggestions awaiting approval.
+                  </p>
                   <div className="calendar-grid">
                     {Array.from({ length: 7 }, (_, n) => {
                       const d = new Date(Date.parse(today) + (calendarOffset * 7 + n) * 86400000);
@@ -1066,7 +1075,9 @@ export default function Workspace({ view }: { view: string[] }) {
                                     : dateLabel(e.start, timezone).split(', ').slice(1).join(', ')}
                                 </span>
                                 {e.location && <small>{e.location}</small>}
-                                <small>{e.demo ? 'Demo calendar' : 'Google Calendar'}</small>
+                                {data.config.googleConnected && (
+                                  <small>{e.demo ? 'Demo calendar' : 'Google Calendar'}</small>
+                                )}
                               </div>
                             ))}
                           {active
@@ -1204,11 +1215,15 @@ export default function Workspace({ view }: { view: string[] }) {
                   </div>
                   <div className="board-toolbar">
                     <h2>
-                      {searching
-                        ? 'Looking through your pile…'
-                        : `${results.length + sourceResults.length} matches`}
+                      {!query.trim()
+                        ? 'Start with something you remember'
+                        : searching
+                          ? 'Looking through your pile…'
+                          : `${results.length} ${results.length === 1 ? 'item' : 'items'} · ${sourceResults.length} ${sourceResults.length === 1 ? 'source' : 'sources'}`}
                     </h2>
                   </div>
+                  <p className="search-mode">{searchProvider}</p>
+                  {!!results.length && <h3 className="search-group-title">Items</h3>}
                   <div className="results-grid">
                     {results.map((i) => (
                       <div key={i.id}>
@@ -1220,6 +1235,9 @@ export default function Workspace({ view }: { view: string[] }) {
                       </div>
                     ))}
                   </div>
+                  {!!sourceResults.length && (
+                    <h3 className="search-group-title">Sources · the original context</h3>
+                  )}
                   <div className="source-grid search-source-results">
                     {sourceResults.map((source) => (
                       <div key={source.id}>
@@ -1234,11 +1252,17 @@ export default function Workspace({ view }: { view: string[] }) {
                   {!searching && !results.length && !sourceResults.length && (
                     <div className="empty-page">
                       <Search size={38} />
-                      <h3>Nothing in your pile matches that yet.</h3>
+                      <h3>
+                        {query.trim()
+                          ? 'Nothing in your pile matches that yet.'
+                          : 'A name, a deadline, a half-remembered thought.'}
+                      </h3>
                       <p>Try a name, a project, or a few words you remember.</p>
-                      <button className="small-button" onClick={() => setQuery('')}>
-                        Clear search
-                      </button>
+                      {!!query.trim() && (
+                        <button className="small-button" onClick={() => setQuery('')}>
+                          Clear search
+                        </button>
+                      )}
                     </div>
                   )}
                 </>
@@ -1844,7 +1868,7 @@ function ItemEditor({
             })
           }
         >
-          Add to Apple Calendar · .ics
+          Download calendar file (.ics)
         </button>
       )}
       <div className="modal-actions">
@@ -1998,6 +2022,10 @@ function ReviewPanel({
           {error}
         </p>
       )}
+      <p className="review-provenance">
+        {source?.pageCount ? `${source.pageCount}-page source · ` : ''}Only the useful parts become
+        items. Your original stays intact.
+      </p>
       <div className="review-summary">
         <span>
           <strong>
@@ -2057,6 +2085,12 @@ function ReviewPanel({
                         : dateLabel(i.startDateTime || i.dueDate, timezone) || i.type}
                       {i.location && ` · ${i.location}`}
                     </span>
+                    {(i.evidence || i.sourceExcerpt) && (
+                      <details className="item-evidence">
+                        <summary>Why this item?</summary>
+                        <blockquote>{i.evidence || i.sourceExcerpt}</blockquote>
+                      </details>
+                    )}
                     {i.needsClarification && <small>{i.clarificationQuestion}</small>}
                     {i.calendarStatus === 'synced' && <small>Already linked to calendar</small>}
                   </div>
@@ -2129,7 +2163,7 @@ function ReviewPanel({
           }
         }}
       >
-        Add to Apple Calendar · .ics
+        Download calendar file (.ics)
       </button>
       {exported && (
         <p role="status" className="subtle">
@@ -2180,9 +2214,33 @@ function VoiceCapture({
     setError('');
     setBusy(true);
     try {
-      stream.current = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-      });
+      let acceptingStream = true;
+      let permissionTimer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        stream.current = await Promise.race([
+          navigator.mediaDevices.getUserMedia({ audio: true }).then((granted) => {
+            if (!acceptingStream || unmounted.current) {
+              granted.getTracks().forEach((track) => track.stop());
+              throw new Error('Microphone request cancelled.');
+            }
+            return granted;
+          }),
+          new Promise<never>((_, reject) => {
+            permissionTimer = setTimeout(
+              () =>
+                reject(
+                  new Error(
+                    'Microphone permission is still pending. Try again, type a transcript, or use the sample.',
+                  ),
+                ),
+              15000,
+            );
+          }),
+        ]);
+      } finally {
+        acceptingStream = false;
+        clearTimeout(permissionTimer);
+      }
       if (unmounted.current) {
         stream.current.getTracks().forEach((track) => track.stop());
         return;
@@ -2236,8 +2294,13 @@ function VoiceCapture({
       recordedDuration.current = undefined;
       rec.start(1000);
       setRecording(true);
-    } catch {
-      setError('Microphone access is unavailable. You can type a transcript or use the sample.');
+    } catch (e) {
+      stream.current?.getTracks().forEach((track) => track.stop());
+      setError(
+        e instanceof Error && e.message.startsWith('Microphone permission')
+          ? e.message
+          : 'Microphone access is unavailable. You can type a transcript or use the sample.',
+      );
     } finally {
       if (!unmounted.current) setBusy(false);
     }
@@ -2294,7 +2357,9 @@ function VoiceCapture({
           ? 'Recording · the bars are a status animation.'
           : busy
             ? activity
-            : 'Press to record. No perfect sentences needed.'}
+            : real
+              ? 'Press to record. No perfect sentences needed.'
+              : 'Transcription is not configured here. Type below or use the labeled sample.'}
       </p>
       {error && (
         <div role="alert" className="error-banner">

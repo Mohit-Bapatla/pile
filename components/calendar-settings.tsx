@@ -56,17 +56,21 @@ export function CalendarSettings({
   }, [config.googleConnected]);
   async function save(patch: Preferences) {
     setError('');
-    const response = await fetch('/api/preferences', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patch),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      setError(data.error);
-      return;
+    try {
+      const response = await fetch('/api/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error);
+        return;
+      }
+      await onChange();
+    } catch {
+      setError('Could not save your settings. Check the connection and try again.');
     }
-    await onChange();
   }
   return (
     <section className="content-panel settings-panel">
