@@ -18,7 +18,9 @@
   },
   "notes": [
     "Final E2E run was serial and green. Earlier failed runs are not combined into this total.",
-    "Native Safari and physical microphone were blocked by the locked Mac.",
-    "Live Google, Backboard and Tiger credentials were absent."
-  ]
+    "Native Safari/physical microphone were initially blocked by a locked Mac. Access returned, but the user resumed Safari control before a complete native check; physical voice remains unverified.",
+    "Live Google, Backboard and Tiger credentials were absent.",
+    "Initial GitHub CI: 39 E2E passed, one Calendar test failed due to a Chicago seed date outside the UTC runner week. The test was corrected to navigate to its stored date; all 8 correctness scenarios passed with an explicitly UTC browser."
+  ],
+  "utcCorrectnessPassed": 8
 }
