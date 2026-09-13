@@ -105,6 +105,6 @@ Regenerate with `pnpm fixtures`. Capture current screens with `pnpm screenshots`
 
 Read the [final HackRice handoff](docs/FINAL_HACKRICE_HANDOFF.md), [adversarial QA log](docs/FINAL_QA.md), [complete external ChatGPT critique](docs/CHATGPT_CRITIQUE.md), [independent critique decisions](docs/CRITIQUE_DECISIONS.md), [design principles](docs/DESIGN.md), and [accessibility results](docs/ACCESSIBILITY_RESULTS.json). Previous handoffs are historical snapshots.
 
-Final local gate: **55 unit + 36 integration + 29 Chromium E2E = 120 passing functional tests**, plus lint, typecheck, production build, fresh migrations/seed and visual/accessibility checks. Real sponsor credentials, physical microphone speech and a completed native Apple Calendar import remain unverified. The final handoff contains the precise evidence boundaries and release commit.
+Final local gate: **55 unit + 36 integration + 30 Chromium E2E = 121 passing functional tests**, plus lint, typecheck, production build, fresh migrations/seed and visual/accessibility checks. Real sponsor credentials, physical microphone speech and a completed native Apple Calendar import remain unverified. The final handoff contains the precise evidence boundaries and release commit.
 
 The local demo is not a multi-device account product. Browser-cookie sessions, no background external calendar reconciliation, limited deterministic document layouts, no scanned-PDF OCR, and no retained audio playback are intentional current limits. See the handoff for exact tests and provider verification boundaries.

@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/app');
+  await expect(page.getByRole('heading', { name: 'Your board', exact: true })).toBeVisible();
 });
 test('source-only capture stays searchable and conflicting dates cannot be approved', async ({
   page,
@@ -41,12 +42,29 @@ test('settings network failure is recoverable without an unhandled error', async
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/app/settings');
-  await page.route('**/api/preferences', (r) => r.abort());
   await page.getByLabel('Timezone', { exact: true }).fill('Asia/Tokyo');
+  await page.route('**/api/preferences', (r) =>
+    r.request().method() === 'PATCH' ? r.abort() : r.continue(),
+  );
   await page.getByRole('button', { name: 'Save timezone' }).click();
   await expect(page.locator('.error-banner[role=alert]')).toContainText(
     'Could not save your settings',
   );
+  expect(errors).toEqual([]);
+});
+test('header hydrates without clock mismatch and follows the active timezone', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.clock.install({ time: new Date('2040-01-02T01:00:00Z') });
+  for (const [timezone, day] of [
+    ['America/Los_Angeles', 'January 1'],
+    ['Asia/Tokyo', 'January 2'],
+  ]) {
+    const response = await page.request.patch('/api/preferences', { data: { timezone } });
+    expect(response.ok()).toBe(true);
+    await page.goto('/app');
+    await expect(page.locator('.header-date strong')).toHaveText(day);
+  }
   expect(errors).toEqual([]);
 });
 test('image-only PDF preserves original with an honest error and retry', async ({ page }) => {

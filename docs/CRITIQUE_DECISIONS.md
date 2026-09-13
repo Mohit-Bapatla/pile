@@ -32,4 +32,4 @@ The two additional DST regressions were independently discovered while ChatGPT w
 
 ## Completion
 
-All six bounded groups were completed. The headed `pile-judging` session contains only the five seed items and is left ready on the board. The completion control already has a specific Complete/Reopen accessible name; no further visual redesign was made. Final gate: 55 unit, 36 integration, 29 E2E (120 total), plus production visual/accessibility and external-network-blocked browser smoke. See FINAL_HACKRICE_HANDOFF.md for the release record and exact device limits.
+All six bounded groups were completed. The headed `pile-judging` session contains only the five seed items and is left ready on the board. The completion control already has a specific Complete/Reopen accessible name; no further visual redesign was made. Final gate: 55 unit, 36 integration, 30 E2E (121 total), plus production visual/accessibility and external-network-blocked browser smoke. See FINAL_HACKRICE_HANDOFF.md for the release record and exact device limits.

@@ -622,15 +622,12 @@ export default function Workspace({ view }: { view: string[] }) {
                 )}
               </p>
             </div>
-            <span className="header-date">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long' })}
-              <strong>
-                {new Date().toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </strong>
-            </span>
+            {data && (
+              <span className="header-date">
+                {formatInTimeZone(new Date(), timezone, 'EEEE')}
+                <strong>{formatInTimeZone(new Date(), timezone, 'MMMM d')}</strong>
+              </span>
+            )}
           </section>
           {error && (
             <div role="alert" className="error-banner">
