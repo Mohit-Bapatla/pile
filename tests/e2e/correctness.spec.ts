@@ -167,6 +167,11 @@ test('unsynced Calendar task completion suppresses repeated writes and preserves
   page,
 }) => {
   await page.goto('/app/calendar');
+  const initial = await (await page.request.get('/api/state')).json();
+  const day = initial.items.find(
+    (i: { title: string; dueDate: string }) => i.title === 'Finish HackRice demo',
+  ).dueDate;
+  await page.getByLabel('Jump to date').fill(day);
   let writes = 0;
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
@@ -183,13 +188,17 @@ test('unsynced Calendar task completion suppresses repeated writes and preserves
   await button.click();
   await expect(button).toBeDisabled();
   await button.dispatchEvent('click');
-  expect(writes).toBe(1);
+  await expect.poll(() => writes).toBe(1);
   release();
   await expect(
     page.getByRole('button', { name: 'Reopen Finish HackRice demo', exact: true }),
   ).toBeVisible();
   await page.reload();
+  await page.getByLabel('Jump to date').fill(day);
   await page.getByRole('button', { name: 'Reopen Finish HackRice demo', exact: true }).click();
+  await expect(
+    page.getByRole('button', { name: 'Complete Finish HackRice demo', exact: true }),
+  ).toBeVisible();
   await page.goto('/app');
   await page.getByRole('button', { name: 'Edit Finish HackRice demo', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Archive', exact: true }).click();
