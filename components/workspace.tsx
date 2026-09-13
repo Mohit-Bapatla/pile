@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { PileCard } from './pile-card';
 import { CalendarSettings, downloadCalendar } from './calendar-settings';
 import type { Preferences } from '@/lib/preferences';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from '@/lib/upload-limits';
 import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import { calendarOccurrences, nextMeeting } from '@/lib/recurrence';
 import { matchingExcerpt, searchTokens } from '@/lib/search';
@@ -290,6 +291,10 @@ export default function Workspace({ view }: { view: string[] }) {
     durationSeconds?: number,
   ) {
     if (busy) return;
+    if (content instanceof File && content.size > MAX_UPLOAD_BYTES) {
+      setError(`Choose a file smaller than ${MAX_UPLOAD_MB} MB.`);
+      return;
+    }
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const landing = new Promise((resolve) => setTimeout(resolve, reduced ? 0 : 800));
     if (sortingTimer.current) clearTimeout(sortingTimer.current);
@@ -2308,6 +2313,10 @@ function VoiceCapture({
     return () => controller.abort();
   }, []);
   async function transcribe(file: File) {
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError(`This recording is larger than ${MAX_UPLOAD_MB} MB. Try a shorter recording.`);
+      return;
+    }
     setActivity('Transcribing your recording…');
     setBusy(true);
     setError('');

@@ -1,0 +1,17 @@
+{
+  "url": "https://pile-b06is5lp1-bapatlamohitwork-2162s-projects.vercel.app",
+  "checks": [
+    "Curated seed, hosted PostgreSQL, ElevenLabs config, secure cookie",
+    "5 MB file rejected before upload",
+    "Real hosted ElevenLabs recording produces 3 atomic academic items (generated speech)",
+    "Captured source persists after reload",
+    "Syllabus: 7 clean candidates and 5 selected Calendar additions",
+    "Hosted PDF native rendering works",
+    "Calendar completion persists to Board",
+    "Search returns zero unrelated items",
+    "6 desktop/mobile production views without overflow",
+    "Temporary verification workspace removed"
+  ],
+  "errors": [],
+  "transcript": "I have a probability test, linear algebra midterm Wednesday, and calculus homework due Friday."
+}

@@ -32,8 +32,10 @@ import { memoryFor, indexItems, forgetItems } from '@/lib/memory';
 import { preferences, savePreferences } from '@/lib/preferences';
 import { createICS } from '@/lib/ics';
 import { pdfPreview } from '@/lib/files';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from '@/lib/upload-limits';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
 type Context = { params: Promise<{ path: string[] }> };
 const timezone = z.string().refine((v) => {
   try {
@@ -55,8 +57,8 @@ async function handle(req: Request, ctx: Context) {
       const origin = req.headers.get('origin');
       if (origin && new URL(origin).host !== req.headers.get('host'))
         return NextResponse.json({ error: 'Request origin rejected.' }, { status: 403 });
-      if (Number(req.headers.get('content-length') || 0) > 12 * 1024 * 1024)
-        throw new Error('Please use a file smaller than 8 MB.');
+      if (Number(req.headers.get('content-length') || 0) > MAX_UPLOAD_BYTES + 512 * 1024)
+        throw new Error(`Please use a file smaller than ${MAX_UPLOAD_MB} MB.`);
     }
     const db = await database();
     const user = await session(db);
@@ -186,8 +188,8 @@ async function handle(req: Request, ctx: Context) {
       if (contentType.includes('multipart/form-data')) {
         const form = await req.formData();
         const file = form.get('file');
-        if (!(file instanceof File) || file.size > 8 * 1024 * 1024 || file.size === 0)
-          throw new Error('Choose a nonempty file smaller than 8 MB.');
+        if (!(file instanceof File) || file.size > MAX_UPLOAD_BYTES || file.size === 0)
+          throw new Error(`Choose a nonempty file smaller than ${MAX_UPLOAD_MB} MB.`);
         bytes = Buffer.from(await file.arrayBuffer());
         const ext = file.name.split('.').pop()?.toLowerCase();
         const tz = timezone.parse(form.get('timezone') || 'America/Chicago');
@@ -409,8 +411,8 @@ async function handle(req: Request, ctx: Context) {
         return NextResponse.json({ text: DEMO_TRANSCRIPT, demo: true });
       }
       const audio = form.get('audio');
-      if (!(audio instanceof File) || audio.size === 0 || audio.size > 8 * 1024 * 1024)
-        throw new Error('Recording must be smaller than 8 MB.');
+      if (!(audio instanceof File) || audio.size === 0 || audio.size > MAX_UPLOAD_BYTES)
+        throw new Error(`Recording must be smaller than ${MAX_UPLOAD_MB} MB.`);
       if (!process.env.ELEVENLABS_API_KEY)
         throw new Error(
           'Transcription is not configured. Use the sample transcript or type your recording.',

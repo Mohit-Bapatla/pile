@@ -1,11 +1,20 @@
-import { PDFParse } from 'pdf-parse';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { AIProvider, ParseContext } from './ai';
+async function createPDFParser(bytes: Buffer) {
+  // Load the native renderer explicitly so serverless tracing includes its binary.
+  // Keep PDF initialization out of unrelated text/voice/state requests.
+  const canvas = await import('@napi-rs/canvas');
+  for (const name of ['DOMMatrix', 'ImageData', 'Path2D'] as const) {
+    if (!(name in globalThis)) Object.assign(globalThis, { [name]: canvas[name] });
+  }
+  const { PDFParse } = await import('pdf-parse');
+  return new PDFParse({ data: new Uint8Array(bytes) });
+}
 export async function pdfText(bytes: Buffer) {
   if (bytes.subarray(0, 5).toString() !== '%PDF-') throw new Error('This file is not a valid PDF.');
-  const parser = new PDFParse({ data: new Uint8Array(bytes) });
+  const parser = await createPDFParser(bytes);
   try {
     const result = await parser.getText();
     if (!result.pages.some((page) => page.text.trim()))
@@ -47,7 +56,7 @@ export async function parseImage(
 }
 
 export async function pdfPreview(bytes: Buffer, page: number) {
-  const parser = new PDFParse({ data: new Uint8Array(bytes) });
+  const parser = await createPDFParser(bytes);
   try {
     const result = await parser.getScreenshot({
       partial: [page],
@@ -63,7 +72,7 @@ export async function pdfPreview(bytes: Buffer, page: number) {
 }
 
 export async function pdfPageCount(bytes: Buffer) {
-  const parser = new PDFParse({ data: new Uint8Array(bytes) });
+  const parser = await createPDFParser(bytes);
   try {
     return (await parser.getInfo()).total;
   } finally {

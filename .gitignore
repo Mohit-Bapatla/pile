@@ -16,3 +16,4 @@ next-env.d.ts
 
 # Full-size QA captures stay local; compact contact sheets are versioned.
 /docs/screenshots/qa/*.png
+.vercel/

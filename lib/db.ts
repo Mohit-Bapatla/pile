@@ -40,6 +40,8 @@ export async function openDB(location?: string): Promise<DB> {
     };
     return db;
   }
+  if (!location && process.env.VERCEL === '1')
+    throw new Error('Configure DATABASE_URL or TIGER_DATABASE_URL for persistent hosted storage.');
   const dir = location || process.env.DATA_DIR || '.data/pile';
   if (dir !== 'memory://')
     await mkdir(path.resolve(/* turbopackIgnore: true */ dir), { recursive: true });

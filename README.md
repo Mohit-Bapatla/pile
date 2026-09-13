@@ -103,6 +103,8 @@ Regenerate with `pnpm fixtures`. Capture QA screens with `pnpm qa:server` and `p
 
 ## Handoff and verification
 
+**Hosted demo:** [Open Pile](https://pile-black.vercel.app/app). See [Vercel deployment and hosted verification](docs/VERCEL_DEPLOYMENT.md) for production storage, environment setup, upload limits, and release checks.
+
 Read the [final HackRice handoff](docs/FINAL_HACKRICE_HANDOFF.md), [adversarial QA log](docs/FINAL_QA.md), [complete external ChatGPT critique](docs/CHATGPT_CRITIQUE.md), [independent critique decisions](docs/CRITIQUE_DECISIONS.md), [design principles](docs/DESIGN.md), and [accessibility results](docs/ACCESSIBILITY_RESULTS.json). Previous handoffs are historical snapshots.
 
 Current release evidence and exact test totals are in [FINAL_DEMO_READY_HANDOFF.md](docs/FINAL_DEMO_READY_HANDOFF.md). Earlier handoffs and Apple Calendar import evidence are historical snapshots. Automated functional, extraction, production visual and live ElevenLabs checks have separate evidence files under `docs/qa/`.

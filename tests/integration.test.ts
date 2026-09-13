@@ -466,3 +466,16 @@ describe('prejudge corpus, failure and provider paths', () => {
     );
   });
 });
+
+describe('hosted storage configuration', () => {
+  it('refuses an ephemeral database on Vercel when no hosted connection is configured', async () => {
+    vi.stubEnv('VERCEL', '1');
+    vi.stubEnv('DATABASE_URL', '');
+    vi.stubEnv('TIGER_DATABASE_URL', '');
+    try {
+      await expect(openDB()).rejects.toThrow('persistent hosted storage');
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});

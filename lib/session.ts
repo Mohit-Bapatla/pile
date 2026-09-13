@@ -18,7 +18,8 @@ export async function session(db: DB) {
   jar.set('pile_session', token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.GOOGLE_REDIRECT_URI?.startsWith('https:') || false,
+    secure:
+      process.env.VERCEL === '1' || process.env.GOOGLE_REDIRECT_URI?.startsWith('https:') || false,
     maxAge: 60 * 60 * 24 * 90,
     path: '/',
   });
