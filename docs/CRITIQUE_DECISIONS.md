@@ -28,8 +28,10 @@ Source: full rendered ChatGPT response in CHATGPT_CRITIQUE.md, obtained in the u
 5. Voice permission-wait recovery and truthful sample guidance.
 6. Isolated judging browser preparation and revised 100-second demonstration.
 
-The two additional DST regressions were independently discovered while ChatGPT was thinking; they are QA fixes, not attributed to the critique. Live sponsor tests and native Apple import remain limitations, not hidden successes. No additional major features or architectural refactor are authorized by this critique.
+The two additional DST regressions were independently discovered while ChatGPT was thinking; they are QA fixes, not attributed to the critique. At critique time, live sponsor tests and native Apple import were still limitations. The final native-import follow-up is recorded below. No additional major features or architectural refactor are authorized by this critique.
 
 ## Completion
 
 All six bounded groups were completed. The headed `pile-judging` session contains only the five seed items and is left ready on the board. The completion control already has a specific Complete/Reopen accessible name; no further visual redesign was made. Final gate: 55 unit, 36 integration, 30 E2E (121 total), plus production visual/accessibility and external-network-blocked browser smoke. See FINAL_HACKRICE_HANDOFF.md for the release record and exact device limits.
+
+Native Apple follow-up: actual timed ICS import succeeded during the final CI wait using an isolated disposable calendar. The event and empty calendar were removed afterward. The earlier import limitation in the critique remains historical; exact final evidence is in FINAL_QA.md.
